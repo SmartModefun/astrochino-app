@@ -7,20 +7,8 @@ services:
     plan: starter
     dockerfilePath: ./Dockerfile
     envVars:
-      - key: LLM_API_KEY
-        sync: false
-      - key: JWT_SECRET
-        sync: false
       - key: DB_PATH
         value: /data/astrochino.db
-      - key: PAYPAL_CLIENT_ID
-        sync: false
-      - key: PAYPAL_CLIENT_SECRET
-        sync: false
-      - key: PAYPAL_WEBHOOK_ID
-        sync: false
-      - key: PREMIUM_PLAN_ID
-        sync: false
       - key: PAYPAL_SANDBOX
         value: "true"
     disk:
