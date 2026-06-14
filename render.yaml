@@ -3,7 +3,7 @@ services:
     name: astrochino
     runtime: docker
     repo: https://github.com/SmartModefun/astrochino-app
-    branch: master
+    branch: main
     plan: starter
     dockerfilePath: ./Dockerfile
     envVars:
