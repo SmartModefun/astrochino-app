@@ -1,0 +1,311 @@
+import os, jwt, httpx, json, hashlib, sqlite3, aiosqlite, random
+from datetime import datetime, timedelta, timezone, date
+from fastapi import FastAPI, HTTPException, Request, Depends
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+from dotenv import load_dotenv
+from zoneinfo import ZoneInfo
+
+load_dotenv()
+TZ_ARG = ZoneInfo("America/Argentina/Buenos_Aires")
+
+app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+
+DB_PATH = os.getenv("DB_PATH", "astrochino.db")
+JWT_SECRET = os.getenv("JWT_SECRET") or "dev-secret-change-in-production"
+LLM_API_KEY = os.getenv("LLM_API_KEY") or ""
+GEMINI_MODEL = "gemini-2.5-flash"
+
+# ── Chinese Zodiac Data ──────────────────────────────
+ANIMALS = [
+    {"id": 0, "name": "Rata",   "name_en": "Rat",     "branch": "子", "hours": "23:00-01:00", "polarity": "Yang", "element": "Agua",   "trine": 0, "seasons": "Invierno medio"},
+    {"id": 1, "name": "Buey",   "name_en": "Ox",      "branch": "丑", "hours": "01:00-03:00", "polarity": "Yin",  "element": "Tierra", "trine": 1, "seasons": "Invierno tardío"},
+    {"id": 2, "name": "Tigre",  "name_en": "Tiger",   "branch": "寅", "hours": "03:00-05:00", "polarity": "Yang", "element": "Madera", "trine": 2, "seasons": "Primavera temprana"},
+    {"id": 3, "name": "Conejo", "name_en": "Rabbit",  "branch": "卯", "hours": "05:00-07:00", "polarity": "Yin",  "element": "Madera", "trine": 3, "seasons": "Primavera media"},
+    {"id": 4, "name": "Dragón", "name_en": "Dragon",  "branch": "辰", "hours": "07:00-09:00", "polarity": "Yang", "element": "Tierra", "trine": 0, "seasons": "Primavera tardía"},
+    {"id": 5, "name": "Serpiente", "name_en": "Snake",  "branch": "巳", "hours": "09:00-11:00", "polarity": "Yin",  "element": "Fuego",  "trine": 1, "seasons": "Verano temprano"},
+    {"id": 6, "name": "Caballo","name_en": "Horse",   "branch": "午", "hours": "11:00-13:00", "polarity": "Yang", "element": "Fuego",  "trine": 2, "seasons": "Verano medio"},
+    {"id": 7, "name": "Cabra",  "name_en": "Goat",    "branch": "未", "hours": "13:00-15:00", "polarity": "Yin",  "element": "Tierra", "trine": 3, "seasons": "Verano tardío"},
+    {"id": 8, "name": "Mono",   "name_en": "Monkey",  "branch": "申", "hours": "15:00-17:00", "polarity": "Yang", "element": "Metal",  "trine": 0, "seasons": "Otoño temprano"},
+    {"id": 9, "name": "Gallo",  "name_en": "Rooster", "branch": "酉", "hours": "17:00-19:00", "polarity": "Yin",  "element": "Metal",  "trine": 1, "seasons": "Otoño medio"},
+    {"id": 10, "name": "Perro", "name_en": "Dog",     "branch": "戌", "hours": "19:00-21:00", "polarity": "Yang", "element": "Tierra", "trine": 2, "seasons": "Otoño tardío"},
+    {"id": 11, "name": "Cerdo", "name_en": "Pig",     "branch": "亥", "hours": "21:00-23:00", "polarity": "Yin",  "element": "Agua",   "trine": 3, "seasons": "Invierno temprano"},
+]
+
+ELEMENT_CYCLE = ["Madera", "Madera", "Fuego", "Fuego", "Tierra", "Tierra", "Metal", "Metal", "Agua", "Agua"]
+ELEMENT_CYCLE_EN = ["Wood", "Wood", "Fire", "Fire", "Earth", "Earth", "Metal", "Metal", "Water", "Water"]
+
+PERSONALIDAD = {
+    "Rata": "Inteligente, carismática, adaptable y estratega. La Rata observa oportunidades donde otros no ven nada. Es astuta con el dinero y los negocios.",
+    "Buey": "Leal, paciente, trabajador y confiable. El Buey construye a través de la perseverancia. Prefiere la estabilidad sobre la apariencia.",
+    "Tigre": "Valiente, protector, inquieto y apasionado. El Tigre desafía lo injusto y empuja límites. Tiene un espíritu indomable.",
+    "Conejo": "Elegante, diplomático, perceptivo y refinado. El Conejo busca armonía y sobrevive a través del tacto y la inteligencia social.",
+    "Dragón": "Visionario, carismático, dramático y magnético. El Dragón atrae atención y tiene la fuerza del trueno primaveral.",
+    "Serpiente": "Observadora, privada, inteligente e intensa. La Serpiente estudia patrones y nunca revela todos sus pensamientos.",
+    "Caballo": "Activo, independiente, expresivo y amante de la libertad. El Caballo necesita velocidad, movimiento y experiencias directas.",
+    "Cabra": "Gentil, creativa, relacional y sensible. La Cabra valora la pertenencia, la belleza y la conexión emocional.",
+    "Mono": "Inventivo, ingenioso, técnico y resolutivo. El Mono juega con sistemas hasta encontrar una apertura.",
+    "Gallo": "Preciso, observador, organizado y honesto. El Gallo nota lo que está fuera de orden y no teme decirlo.",
+    "Perro": "Leal, justo, protector e íntegro. El Perro defiende la verdad y cuida de los suyos con devoción incondicional.",
+    "Cerdo": "Generoso, sincero, indulgente y optimista. El Cerdo disfruta la vida y confía en la bondad del mundo."
+}
+
+LUCKY = {
+    "Rata": {"numeros": [2, 3], "colores": ["Azul", "Dorado", "Verde"], "direccion": "Norte"},
+    "Buey": {"numeros": [1, 9], "colores": ["Rojo", "Amarillo", "Verde"], "direccion": "Este"},
+    "Tigre": {"numeros": [1, 3, 4], "colores": ["Gris", "Azul", "Naranja"], "direccion": "Noreste"},
+    "Conejo": {"numeros": [3, 6, 9], "colores": ["Rojo", "Rosa", "Púrpura"], "direccion": "Este"},
+    "Dragón": {"numeros": [1, 6, 7], "colores": ["Dorado", "Plateado", "Blanco"], "direccion": "Este"},
+    "Serpiente": {"numeros": [2, 8, 9], "colores": ["Rojo", "Negro", "Amarillo"], "direccion": "Sur"},
+    "Caballo": {"numeros": [2, 3, 7], "colores": ["Rojo", "Amarillo", "Verde"], "direccion": "Sur"},
+    "Cabra": {"numeros": [2, 7], "colores": ["Rojo", "Azul", "Rosa"], "direccion": "Suroeste"},
+    "Mono": {"numeros": [1, 7, 8], "colores": ["Blanco", "Dorado", "Azul"], "direccion": "Noroeste"},
+    "Gallo": {"numeros": [5, 7, 8], "colores": ["Plateado", "Amarillo", "Dorado"], "direccion": "Oeste"},
+    "Perro": {"numeros": [3, 4, 9], "colores": ["Rojo", "Verde", "Púrpura"], "direccion": "Este"},
+    "Cerdo": {"numeros": [1, 3, 8], "colores": ["Amarillo", "Gris", "Marrón"], "direccion": "Norte"}
+}
+
+# Chinese New Year dates (1924-2043) for sign calculation
+CHINESE_NEW_YEAR = [
+    (1924, 2, 5), (1925, 1, 24), (1926, 2, 13), (1927, 2, 2), (1928, 1, 23), (1929, 2, 10),
+    (1930, 1, 30), (1931, 2, 17), (1932, 2, 6), (1933, 1, 26), (1934, 2, 14), (1935, 2, 4),
+    (1936, 1, 24), (1937, 2, 11), (1938, 1, 31), (1939, 2, 19), (1940, 2, 8), (1941, 1, 27),
+    (1942, 2, 15), (1943, 2, 5), (1944, 1, 25), (1945, 2, 13), (1946, 2, 2), (1947, 1, 22),
+    (1948, 2, 10), (1949, 1, 29), (1950, 2, 17), (1951, 2, 6), (1952, 1, 27), (1953, 2, 14),
+    (1954, 2, 3), (1955, 1, 24), (1956, 2, 12), (1957, 1, 31), (1958, 2, 18), (1959, 2, 8),
+    (1960, 1, 28), (1961, 2, 15), (1962, 2, 5), (1963, 1, 25), (1964, 2, 13), (1965, 2, 2),
+    (1966, 1, 21), (1967, 2, 9), (1968, 1, 30), (1969, 2, 17), (1970, 2, 6), (1971, 1, 27),
+    (1972, 2, 15), (1973, 2, 3), (1974, 1, 23), (1975, 2, 11), (1976, 1, 31), (1977, 2, 18),
+    (1978, 2, 7), (1979, 1, 28), (1980, 2, 16), (1981, 2, 5), (1982, 1, 25), (1983, 2, 13),
+    (1984, 2, 2), (1985, 2, 20), (1986, 2, 9), (1987, 1, 29), (1988, 2, 17), (1989, 2, 6),
+    (1990, 1, 27), (1991, 2, 15), (1992, 2, 4), (1993, 1, 23), (1994, 2, 10), (1995, 1, 31),
+    (1996, 2, 19), (1997, 2, 7), (1998, 1, 28), (1999, 2, 16), (2000, 2, 5), (2001, 1, 24),
+    (2002, 2, 12), (2003, 2, 1), (2004, 1, 22), (2005, 2, 9), (2006, 1, 29), (2007, 2, 18),
+    (2008, 2, 7), (2009, 1, 26), (2010, 2, 14), (2011, 2, 3), (2012, 1, 23), (2013, 2, 10),
+    (2014, 1, 31), (2015, 2, 19), (2016, 2, 8), (2017, 1, 28), (2018, 2, 16), (2019, 2, 5),
+    (2020, 1, 25), (2021, 2, 12), (2022, 2, 1), (2023, 1, 22), (2024, 2, 10), (2025, 1, 29),
+    (2026, 2, 17), (2027, 2, 6), (2028, 1, 26), (2029, 2, 13), (2030, 2, 3), (2031, 1, 23),
+    (2032, 2, 11), (2033, 1, 31), (2034, 2, 19), (2035, 2, 8), (2036, 1, 28), (2037, 2, 15),
+    (2038, 2, 4), (2039, 1, 24), (2040, 2, 12), (2041, 2, 1), (2042, 1, 22), (2043, 2, 10),
+]
+
+def get_animal(birth_year: int) -> dict:
+    idx = (birth_year - 4) % 12
+    return ANIMALS[idx]
+
+def get_element(birth_year: int) -> str:
+    stem_idx = (birth_year - 4) % 10
+    return ELEMENT_CYCLE[stem_idx]
+
+def get_animal_by_birthday(year: int, month: int, day: int) -> dict:
+    cny = None
+    for y, m, d in CHINESE_NEW_YEAR:
+        if y == year:
+            cny = date(y, m, d)
+            break
+    if cny is None:
+        return ANIMALS[(year - 4) % 12]
+    birth = date(year, month, day)
+    if birth < cny:
+        year -= 1
+    return ANIMALS[(year - 4) % 12]
+
+def get_compatibility(a1: dict, a2: dict) -> dict:
+    diff = abs(a1["id"] - a2["id"])
+    if diff == 6:
+        score = 20
+        level = "Conflicto"
+        desc = "Son signos opuestos. Tienden a chocar y tener perspectivas muy diferentes."
+    elif a1["trine"] == a2["trine"]:
+        score = 90
+        level = "Excelente"
+        desc = "Pertenecen al mismo tríada. Hay armonía natural y comprensión mutua."
+    elif diff in (4, 8):
+        score = 75
+        level = "Buena"
+        desc = "Hay atracción y respeto mutuo. Pueden construir una relación sólida."
+    elif diff in (3, 9):
+        score = 60
+        level = "Neutral"
+        desc = "Relación neutral. Con esfuerzo pueden entenderse bien."
+    else:
+        score = 45
+        level = "Desafiante"
+        desc = "Requiere trabajo y comprensión. Los opuestos pueden atraerse pero también generar fricción."
+    return {"score": score, "level": level, "desc": desc}
+
+# ── Database ──────────────────────────────────────────
+def init_db():
+    with sqlite3.connect(DB_PATH) as db:
+        db.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, password TEXT, nombre TEXT, animal TEXT NOT NULL DEFAULT '', birth_year INTEGER DEFAULT 0, signo TEXT DEFAULT '', premium INTEGER DEFAULT 0, notifications_enabled INTEGER DEFAULT 1, created_at TEXT DEFAULT (datetime('now')))")
+        db.execute("CREATE TABLE IF NOT EXISTS horoscopes (animal TEXT, date TEXT, contenido TEXT, PRIMARY KEY (animal, date))")
+        db.commit()
+
+init_db()
+
+# ── Auth ──────────────────────────────────────────────
+def create_token(email):
+    return jwt.encode({"email": email, "exp": datetime.now(TZ_ARG) + timedelta(days=30)}, JWT_SECRET, algorithm="HS256")
+
+def get_user(request: Request):
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        raise HTTPException(401, "Se requiere autenticación")
+    try:
+        data = jwt.decode(auth[7:], JWT_SECRET, algorithms=["HS256"])
+        return data["email"]
+    except:
+        raise HTTPException(401, "Token inválido")
+
+# ── Static Files ──────────────────────────────────────
+if os.path.exists("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+async def index():
+    if os.path.exists("static/index.html"):
+        return FileResponse("static/index.html")
+    return {"status": "ok", "app": "AstroChino"}
+
+@app.get("/api/health")
+async def health():
+    return {"status": "ok", "llm_set": bool(LLM_API_KEY)}
+
+# ── Auth Endpoints ────────────────────────────────────
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    nombre: str
+    birth_year: int
+    birth_month: int = 1
+    birth_day: int = 1
+
+@app.post("/api/register")
+async def register(req: RegisterRequest):
+    animal = get_animal_by_birthday(req.birth_year, req.birth_month, req.birth_day)
+    element = get_element(req.birth_year)
+    hashed = hashlib.sha256(req.password.encode()).hexdigest()
+    try:
+        async with aiosqlite.connect(DB_PATH) as db:
+            await db.execute("INSERT INTO users (email, password, nombre, animal, birth_year, signo) VALUES (?, ?, ?, ?, ?, ?)",
+                             (req.email, hashed, req.nombre, animal["name"], req.birth_year, f"{animal['name']} de {element}"))
+            await db.commit()
+    except:
+        raise HTTPException(400, "El email ya está registrado")
+    return {"success": True, "token": create_token(req.email), "animal": animal["name"], "element": element}
+
+@app.post("/api/login")
+async def login(req: RegisterRequest):
+    hashed = hashlib.sha256(req.password.encode()).hexdigest()
+    async with aiosqlite.connect(DB_PATH) as db:
+        row = await db.execute_fetchall("SELECT email, nombre, animal, premium, signo FROM users WHERE email=? AND password=?", (req.email, hashed))
+        if not row:
+            raise HTTPException(401, "Email o contraseña incorrectos")
+        return {"success": True, "token": create_token(req.email), "nombre": row[0][1], "animal": row[0][2], "premium": row[0][3], "signo": row[0][4]}
+
+@app.get("/api/profile")
+async def profile(email: str = Depends(get_user)):
+    async with aiosqlite.connect(DB_PATH) as db:
+        row = await db.execute_fetchall("SELECT email, nombre, animal, premium, notifications_enabled, signo, birth_year FROM users WHERE email=?", (email,))
+        if not row:
+            raise HTTPException(404, "Usuario no encontrado")
+        return {"success": True, "user": {
+            "email": row[0][0], "nombre": row[0][1], "animal": row[0][2],
+            "premium": row[0][3], "notifications_enabled": row[0][4],
+            "signo": row[0][5], "birth_year": row[0][6]
+        }}
+
+# ── Zodiac Endpoints ──────────────────────────────────
+@app.get("/api/animals")
+async def get_animals():
+    return {"success": True, "animals": ANIMALS}
+
+@app.get("/api/animal/{animal_name}")
+async def get_animal_info(animal_name: str):
+    animal = next((a for a in ANIMALS if a["name"].lower() == animal_name.lower()), None)
+    if not animal:
+        raise HTTPException(404, "Animal no encontrado")
+    personality = PERSONALIDAD.get(animal["name"], "")
+    lucky = LUCKY.get(animal["name"], {})
+    return {"success": True, "animal": animal, "personality": personality, "lucky": lucky}
+
+@app.get("/api/calculate")
+async def calculate(year: int, month: int = 1, day: int = 1):
+    animal = get_animal_by_birthday(year, month, day)
+    element = get_element(year)
+    personality = PERSONALIDAD.get(animal["name"], "")
+    lucky = LUCKY.get(animal["name"], {})
+    return {"success": True, "animal": animal, "element": element, "personality": personality, "lucky": lucky}
+
+@app.get("/api/compatibility")
+async def compatibility(animal1: str, animal2: str):
+    a1 = next((a for a in ANIMALS if a["name"].lower() == animal1.lower() or a["name_en"].lower() == animal1.lower()), None)
+    a2 = next((a for a in ANIMALS if a["name"].lower() == animal2.lower() or a["name_en"].lower() == animal2.lower()), None)
+    if not a1 or not a2:
+        raise HTTPException(404, "Animal no encontrado")
+    comp = get_compatibility(a1, a2)
+    return {"success": True, "animal1": a1, "animal2": a2, "compatibility": comp}
+
+# ── Horoscope ─────────────────────────────────────────
+async def generate_horoscope(animal_name: str) -> str:
+    animal = next(a for a in ANIMALS if a["name"] == animal_name)
+    lucky = LUCKY.get(animal_name, {})
+    today = datetime.now(TZ_ARG).strftime("%d/%m/%Y")
+    prompt = f"Eres un astrólogo chino experto. Genera un horóscopo para {animal_name} ({animal['name_en']}) del {today} en español (máx 100 palabras). Incluye energía general del día, un aspecto destacado (amor/trabajo/salud), números de la suerte {lucky.get('numeros', [])} y el color del día. Texto plano."
+    if LLM_API_KEY:
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={LLM_API_KEY}"
+            async with httpx.AsyncClient(timeout=30) as client:
+                r = await client.post(url, json={"contents":[{"parts":[{"text":prompt}]}]})
+                if r.status_code == 200:
+                    data = r.json()
+                    text = data.get("candidates",[{}])[0].get("content",{}).get("parts",[{}])[0].get("text","")
+                    if text: return text.strip()
+        except:
+            pass
+    return _fallback_horoscope(animal_name)
+
+def _fallback_horoscope(animal_name: str) -> str:
+    lucky = LUCKY.get(animal_name, {})
+    colores = lucky.get('colores', ['Rojo'])
+    numeros = lucky.get('numeros', [7])
+    plantillas = [
+        f"⚡ Energía general: Hoy {animal_name} siente una corriente de renovación. Es un día para tomar decisiones con claridad y avanzar sin dudas. Confiá en tu intuición.\n\n❤️ Amor: Las relaciones se profundizan si dedicás tiempo de calidad. Escuchá más de lo que hablás.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}.",
+        f"🌅 Mañana prometedora para {animal_name}. La energía del día te impulsa a concretar proyectos pendientes. Mantené el foco.\n\n💼 Trabajo: Momento de colaborar. Compartir ideas te abrirá puertas inesperadas.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}.",
+        f"🌀 {animal_name}, hoy la clave está en el equilibrio. No te dejes llevar por el impulso; observá antes de actuar.\n\n💪 Salud: Tu energía física está alta. Aprovechá para moverte y despejar la mente.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}.",
+        f"✨ Día de claridad para {animal_name}. Las nubes se disipan y ves el camino con nitidez. Actuá con confianza.\n\n🔮 Consejo: Algo que venías postergando encuentra su momento. No lo dejes pasar.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}.",
+        f"🌟 Buen día para {animal_name}. La energía del {random.choice(['Caballo de Fuego', 'Dragón', 'Tigre'])} te acompaña. Hoy todo fluye con naturalidad.\n\n💕 Amor: Si estás en pareja, sorprendé con un detalle simple. Si estás soltero, alguien del pasado reaparece.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}.",
+    ]
+    return random.choice(plantillas)
+
+@app.get("/api/horoscope/{animal_name}")
+async def get_horoscope(animal_name: str):
+    animal = next((a for a in ANIMALS if a["name"].lower() == animal_name.lower()), None)
+    if not animal:
+        raise HTTPException(404, "Animal no encontrado")
+    today = datetime.now(TZ_ARG).strftime("%Y-%m-%d")
+    async with aiosqlite.connect(DB_PATH) as db:
+        row = await db.execute_fetchall("SELECT contenido FROM horoscopes WHERE animal=? AND date=?", (animal["name"], today))
+        if row:
+            content = row[0][0]
+        else:
+            content = await generate_horoscope(animal["name"])
+            await db.execute("INSERT OR REPLACE INTO horoscopes (animal, date, contenido) VALUES (?, ?, ?)", (animal["name"], today, content))
+            await db.commit()
+    lucky = LUCKY.get(animal["name"], {})
+    return {"success": True, "animal": animal["name"], "date": today, "horoscope": content, "lucky": lucky}
+
+# ── Premium (PayPal same as La Astrología) ────────────
+@app.post("/api/set-premium")
+async def set_premium(email: str = Depends(get_user)):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("UPDATE users SET premium=1 WHERE email=?", (email,))
+        await db.commit()
+    return {"success": True}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "8000")))
