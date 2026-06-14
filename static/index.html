@@ -5,151 +5,329 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>AstroChino — Horóscopo Chino</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Noto+Serif+SC:wght@400;700&display=swap');
+
 * { margin:0; padding:0; box-sizing:border-box; }
+
 :root {
-  --bg:#0a0808; --bg-card:#1a1210; --accent:#c62828; --gold:#d4a017;
-  --text:#f0e6d3; --text-muted:#998;
+  --bg: #0d0806;
+  --bg-card: #1a0f0c;
+  --red: #b22222;
+  --red-dark: #6b1010;
+  --gold: #d4a017;
+  --gold-light: #f0c850;
+  --text: #f0e6d3;
+  --text-muted: #a09080;
+  --border-gold: rgba(212,160,23,0.25);
 }
+
 body {
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  background:var(--bg); color:var(--text); min-height:100vh;
+  font-family: 'Noto Serif SC', 'Playfair Display', Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(180,30,30,0.03) 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, rgba(180,30,30,0.03) 0%, transparent 50%);
 }
-.container { max-width:640px; margin:0 auto; padding:0 16px 100px; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--red); border-radius:3px; }
+
+/* ── Container ── */
+.container { max-width:660px; margin:0 auto; padding:0 16px 110px; }
+
+/* ── Header ── */
+.header {
+  text-align:center; padding:24px 0 16px;
+  position:relative;
+}
+.header::before, .header::after {
+  content:'◆◇◆'; display:block;
+  color:var(--gold); opacity:0.3; letter-spacing:12px;
+  font-size:0.7rem; margin:6px 0;
+}
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size:2rem; font-weight:900;
+  letter-spacing:4px;
+}
+.header h1 .gold { color:var(--gold); }
+.header h1 .red { color:var(--red); }
+.header .sub {
+  font-family: 'Noto Serif SC', serif;
+  font-size:0.75rem; color:var(--text-muted);
+  margin-top:4px; letter-spacing:2px;
+}
+
+/* ── Cards ── */
 .card {
-  background:var(--bg-card); border-radius:12px; padding:20px;
-  margin:14px 0; border:1px solid rgba(180,50,30,0.15);
+  background: linear-gradient(135deg, var(--bg-card), #1a0d0a);
+  border-radius:4px; padding:20px;
+  margin:14px 0;
+  border:1px solid var(--border-gold);
+  position:relative;
+  box-shadow:0 2px 12px rgba(0,0,0,0.3);
 }
-h1 { font-size:1.5rem; text-align:center; padding:20px 0; }
-h1 .gold { color:var(--gold); }
-h1 .red { color:var(--accent); }
-h2 { font-size:1.1rem; margin-bottom:12px; color:var(--gold); }
+.card::before {
+  content:''; position:absolute; top:-1px; left:20%; right:20%;
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.card-title {
+  font-family:'Playfair Display',serif;
+  font-size:1.05rem; color:var(--gold-light);
+  margin-bottom:14px; letter-spacing:1px;
+  display:flex; align-items:center; gap:10px;
+}
+.card-title .coin {
+  display:inline-block; width:22px; height:22px;
+  border:2px solid var(--gold); border-radius:50%;
+  position:relative; flex-shrink:0;
+  background:radial-gradient(circle at 40% 40%, var(--gold-light), var(--gold));
+}
+.card-title .coin::after {
+  content:'□'; position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  font-size:0.5rem; color:var(--bg-card); font-weight:700;
+}
+
+/* ── Buttons ── */
 .btn {
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  padding:12px 24px; border:none; border-radius:8px;
-  font-size:0.9rem; font-weight:600; cursor:pointer;
-  background:linear-gradient(135deg,var(--accent),#8b0000); color:var(--gold);
+  padding:12px 28px; border:none; cursor:pointer;
+  font-size:0.85rem; font-weight:700;
+  font-family:'Noto Serif SC',serif; letter-spacing:1px;
+  background:linear-gradient(180deg,var(--red),var(--red-dark));
+  color:var(--gold-light);
+  position:relative;
+  box-shadow:0 2px 8px rgba(100,0,0,0.3);
 }
-.btn-outline { background:transparent; border:1px solid var(--gold); color:var(--gold); }
-input,select {
-  width:100%; padding:12px; margin:6px 0; border-radius:8px;
-  border:1px solid rgba(180,50,30,0.2); background:rgba(0,0,0,0.4);
-  color:var(--text); font-size:0.9rem;
+.btn::before {
+  content:''; position:absolute; top:2px; left:2px; right:2px; bottom:2px;
+  border:1px solid rgba(255,215,0,0.2); pointer-events:none;
 }
-.auth-msg { margin:8px 0; padding:8px; border-radius:8px; font-size:0.85rem; }
-.auth-msg.error { background:rgba(180,40,40,0.2); color:#ff6b6b; }
-.auth-msg.success { background:rgba(76,175,80,0.15); color:#69f0ae; }
+.btn-outline {
+  background:transparent; border:1px solid var(--gold);
+  color:var(--gold); box-shadow:none;
+}
+.btn-outline::before { display:none; }
+
+/* ── Inputs ── */
+input, select {
+  width:100%; padding:12px; margin:6px 0; border-radius:2px;
+  border:1px solid var(--border-gold); background:rgba(0,0,0,0.4);
+  color:var(--text); font-size:0.85rem; font-family:'Noto Serif SC',serif;
+}
+select { cursor:pointer; }
+input:focus, select:focus { outline:none; border-color:var(--gold); }
+
+/* ── Messages ── */
+.auth-msg { margin:8px 0; padding:8px; font-size:0.8rem; }
+.auth-msg.error { background:rgba(180,30,30,0.2); border-left:3px solid var(--red); color:#ff6b6b; }
+.auth-msg.success { background:rgba(76,175,80,0.1); border-left:3px solid #4caf50; color:#69f0ae; }
+
+/* ── Animal Grid ── */
 .animal-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
 .animal-card {
-  background:var(--bg-card); border-radius:10px; padding:12px 8px;
-  text-align:center; cursor:pointer;
-  border:1px solid rgba(180,50,30,0.1); transition:0.2s;
+  background:var(--bg-card); padding:0; text-align:center; cursor:pointer;
+  border:1px solid var(--border-gold); position:relative;
+  overflow:hidden; transition:0.2s;
 }
 .animal-card:hover { border-color:var(--gold); transform:translateY(-2px); }
-.animal-card .emoji { font-size:1.8rem; display:block; margin-bottom:2px; }
-.animal-card .name { font-size:0.8rem; font-weight:600; color:var(--gold); }
-.animal-card .sub { font-size:0.6rem; color:var(--text-muted); }
-.horoscope-box { white-space:pre-wrap; line-height:1.7; font-size:0.9rem; color:#f0e6d3; }
-.compat-bar { height:8px; border-radius:4px; background:rgba(255,255,255,0.06); overflow:hidden; margin:8px 0; }
-.compat-bar-fill { height:100%; border-radius:4px; transition:width 0.5s; }
-.ad-container { text-align:center; margin:15px 0; }
-.premium-hidden { display:none; }
-.hero {
-  text-align:center; padding:12px 0 8px;
-  background:linear-gradient(135deg,rgba(180,40,40,0.08),rgba(0,0,0,0));
-  border-radius:12px; margin-bottom:8px;
+.animal-card .frame {
+  padding:10px 6px 8px;
+  background:linear-gradient(180deg,rgba(180,30,30,0.05),transparent);
 }
-.hero p { font-size:0.85rem; color:var(--text-muted); margin-top:4px; }
+.animal-card .frame img {
+  width:48px; height:48px; object-fit:contain;
+  display:block; margin:0 auto 4px;
+  filter:drop-shadow(0 1px 3px rgba(212,160,23,0.2));
+}
+.animal-card .frame .name {
+  font-size:0.78rem; font-weight:700; color:var(--gold);
+  display:block; letter-spacing:1px;
+}
+.animal-card .frame .sub {
+  font-size:0.58rem; color:var(--text-muted); display:block; margin-top:2px;
+}
+.animal-card::after {
+  content:''; position:absolute; bottom:0; left:10%; right:10%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0.3;
+}
+
+/* ── Daily Grid ── */
+#dailyGrid { display:flex; flex-wrap:wrap; gap:4px; justify-content:center; }
+#dailyGrid button {
+  background:var(--bg-card); border:1px solid var(--border-gold);
+  padding:6px 10px; cursor:pointer;
+  color:var(--text); font-size:0.7rem;
+  font-family:'Noto Serif SC',serif; transition:0.2s;
+  border-radius:2px;
+}
+#dailyGrid button:hover { border-color:var(--gold); color:var(--gold-light); }
+
+/* ── Horoscope ── */
+.horoscope-box {
+  white-space:pre-wrap; line-height:1.8; font-size:0.85rem;
+  color:#f0e6d3; padding:12px;
+  background:rgba(0,0,0,0.2); margin-top:8px;
+}
+.horoscope-box h3 { color:var(--gold); margin-bottom:8px; font-size:1rem; }
+
+/* ── Compatibility ── */
+.compat-bar { height:6px; border-radius:2px; background:rgba(255,255,255,0.05); overflow:hidden; margin:8px 0; }
+.compat-bar-fill { height:100%; transition:width 0.5s; border-radius:2px; }
+
+/* ── Profile ── */
+.profile-badge {
+  display:inline-block;
+  background:linear-gradient(180deg,var(--gold),#b89400);
+  color:var(--bg-card); padding:3px 12px;
+  font-size:0.75rem; font-weight:700; letter-spacing:1px;
+}
+
+/* ── Nav ── */
 nav {
   position:fixed; bottom:0; left:0; right:0; z-index:100;
   display:flex; justify-content:space-around; align-items:center;
-  background:var(--bg-card); border-top:1px solid rgba(180,50,30,0.15);
-  padding:8px 0; max-width:640px; margin:0 auto;
+  background:linear-gradient(180deg,rgba(13,8,6,0.95),rgba(13,8,6,1));
+  border-top:1px solid var(--border-gold);
+  padding:8px 0 12px; max-width:660px; margin:0 auto;
 }
 nav button {
-  background:none; border:none; color:var(--text-muted); font-size:0.7rem;
-  cursor:pointer; display:flex; flex-direction:column; align-items:center;
-  gap:2px; padding:4px 12px; transition:0.2s;
+  background:none; border:none; color:var(--text-muted);
+  font-size:0.65rem; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center;
+  gap:2px; padding:4px 12px;
+  font-family:'Noto Serif SC',serif; transition:0.2s;
+  letter-spacing:0.5px;
 }
 nav button.active { color:var(--gold); }
-nav button i { font-size:1.2rem; }
+nav button i { font-size:1.1rem; }
+
+/* ── Tabs ── */
 .section { display:none; }
 .section.active { display:block; }
-.badge { display:inline-block; background:var(--gold); color:#1a1210; padding:2px 8px; border-radius:4px; font-size:0.7rem; font-weight:700; }
+
+/* ── Tassel decoration ── */
+.tassel {
+  display:inline-flex; flex-direction:column; align-items:center;
+  margin:0 4px; opacity:0.4;
+}
+.tassel .knot {
+  width:4px; height:12px;
+  background:linear-gradient(180deg,var(--gold),var(--red));
+  border-radius:2px;
+}
+.tassel .fringe {
+  width:2px; height:16px;
+  background:var(--red); border-radius:1px;
+}
+
+/* ── Animal Detail ── */
+#animalDetail h3 { font-size:1.3rem; color:var(--gold); margin-bottom:8px; font-family:'Playfair Display',serif; }
+#animalDetail p { font-size:0.85rem; line-height:1.7; margin:6px 0; }
+
+/* ── Calc Result ── */
+.calc-result {
+  text-align:center; padding:14px;
+  background:rgba(180,30,30,0.08);
+  border:1px solid var(--border-gold);
+  margin-top:10px;
+}
+.calc-result .big { font-size:3rem; display:block; margin-bottom:4px; }
+.calc-result h3 { font-size:1.2rem; color:var(--gold); }
+.calc-result p { font-size:0.8rem; color:var(--text-muted); margin:4px 0; }
+
+/* ── Ad Container ── */
+.ad-container { text-align:center; margin:15px 0; }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
+
 <div class="container">
-  <h1><span class="gold">Astro</span><span class="red">Chino</span></h1>
-  <div class="hero">
-    <p>🐉 Tu guía del zodiaco chino — descubre tu signo, compatibilidad y horóscopo diario</p>
+  <!-- Header -->
+  <div class="header">
+    <h1><span class="gold">Astro</span><span class="red">Chino</span></h1>
+    <div class="sub">— 生肖 占星 —</div>
+    <div style="display:flex;justify-content:center;gap:12px;margin-top:8px;">
+      <span class="tassel"><span class="knot"></span><span class="fringe"></span></span>
+      <span style="font-size:0.7rem;color:var(--text-muted);letter-spacing:2px;">✦ 华 ✦</span>
+      <span class="tassel"><span class="knot"></span><span class="fringe"></span></span>
+    </div>
   </div>
 
-  <!-- Horóscopo -->
+  <!-- Tab: Hoy -->
   <div class="section active" id="tab-horoscope">
     <div class="card">
-      <h2><i class="fas fa-star"></i> Horóscopo de Hoy</h2>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;" id="dailyGrid"></div>
+      <div class="card-title"><span class="coin"></span> Horóscopo de Hoy</div>
+      <div id="dailyGrid"></div>
       <div id="dailyResult" style="margin-top:12px;display:none;" class="horoscope-box"></div>
     </div>
     <div class="card">
-      <h2><i class="fas fa-calculator"></i> ¿Cuál es tu signo chino?</h2>
+      <div class="card-title"><span class="coin"></span> ¿Cuál es tu signo?</div>
       <div style="display:flex;gap:6px;">
-        <select id="calcDay">${Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}</select>
-        <select id="calcMonth">${Array.from({length:12},(_,i)=>`<option value="${i+1}">${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][i]}</option>`).join('')}</select>
-        <select id="calcYear">${Array.from({length:100},(_,i)=>`<option value="${2026-i}">${2026-i}</option>`).join('')}</select>
+        <select id="calcDay"></select>
+        <select id="calcMonth"></select>
+        <select id="calcYear"></select>
       </div>
-      <button class="btn" onclick="calcSign()" style="width:100%;margin-top:8px;">Descubrir mi signo</button>
-      <div id="calcResult" style="margin-top:10px;"></div>
+      <button class="btn" onclick="calcSign()" style="width:100%;margin-top:8px;">☰ Descubrir mi signo</button>
+      <div id="calcResult"></div>
     </div>
   </div>
 
-  <!-- Signos -->
+  <!-- Tab: Signos -->
   <div class="section" id="tab-animals">
     <div class="card">
-      <h2><i class="fas fa-paw"></i> Los 12 Animales</h2>
+      <div class="card-title"><span class="coin"></span> Los 12 Animales</div>
       <div class="animal-grid" id="animalGrid"></div>
     </div>
     <div class="card" id="animalDetail" style="display:none;"></div>
   </div>
 
-  <!-- Compatibilidad -->
+  <!-- Tab: Compat -->
   <div class="section" id="tab-compat">
     <div class="card">
-      <h2><i class="fas fa-heart"></i> Compatibilidad</h2>
-      <select id="compAnimal1"><option value="">Elegí un animal</option></select>
-      <select id="compAnimal2"><option value="">Elegí otro animal</option></select>
-      <button class="btn" onclick="checkCompatibility()" style="width:100%;margin-top:8px;">Ver compatibilidad</button>
+      <div class="card-title"><span class="coin"></span> Compatibilidad</div>
+      <select id="compAnimal1"><option value="">Animal 1</option></select>
+      <select id="compAnimal2"><option value="">Animal 2</option></select>
+      <button class="btn" onclick="checkCompatibility()" style="width:100%;margin-top:8px;">☯ Ver compatibilidad</button>
       <div id="compResult" style="margin-top:12px;"></div>
     </div>
   </div>
 
-  <!-- Cuenta -->
+  <!-- Tab: Cuenta -->
   <div class="section" id="tab-account">
     <div id="authSection">
       <div class="card" id="registerForm">
-        <h2><i class="fas fa-user-plus"></i> Crear Cuenta</h2>
+        <div class="card-title"><span class="coin"></span> Crear Cuenta</div>
         <input type="email" id="regEmail" placeholder="Email">
         <input type="text" id="regName" placeholder="Nombre">
         <input type="password" id="regPass" placeholder="Contraseña">
-        <label style="font-size:0.8rem;color:var(--text-muted);">Fecha de nacimiento</label>
+        <label style="font-size:0.75rem;color:var(--text-muted);">Fecha de nacimiento</label>
         <div style="display:flex;gap:6px;">
-          <select id="regDay">${Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}</select>
-          <select id="regMonth">${Array.from({length:12},(_,i)=>`<option value="${i+1}">${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][i]}</option>`).join('')}</select>
-          <select id="regYear">${Array.from({length:100},(_,i)=>`<option value="${2026-i}">${2026-i}</option>`).join('')}</select>
+          <select id="regDay"></select>
+          <select id="regMonth"></select>
+          <select id="regYear"></select>
         </div>
-        <button class="btn" onclick="register()" style="width:100%;margin-top:8px;">Registrarse</button>
-        <p style="margin-top:8px;font-size:0.8rem;text-align:center;color:var(--text-muted);">
+        <button class="btn" onclick="register()" style="width:100%;margin-top:10px;">☰ Registrarse</button>
+        <p style="margin-top:10px;font-size:0.75rem;text-align:center;color:var(--text-muted);">
           ¿Ya tenés cuenta? <a href="#" onclick="toggleLogin(true)" style="color:var(--gold);">Iniciar sesión</a>
         </p>
         <div id="regMsg" class="auth-msg" style="display:none;"></div>
       </div>
       <div class="card" id="loginForm" style="display:none;">
-        <h2><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</h2>
+        <div class="card-title"><span class="coin"></span> Iniciar Sesión</div>
         <input type="email" id="loginEmail" placeholder="Email">
         <input type="password" id="loginPass" placeholder="Contraseña">
-        <button class="btn" onclick="login()" style="width:100%;margin-top:8px;">Ingresar</button>
-        <p style="margin-top:8px;font-size:0.8rem;text-align:center;color:var(--text-muted);">
+        <button class="btn" onclick="login()" style="width:100%;margin-top:10px;">☰ Ingresar</button>
+        <p style="margin-top:10px;font-size:0.75rem;text-align:center;color:var(--text-muted);">
           ¿No tenés cuenta? <a href="#" onclick="toggleLogin(false)" style="color:var(--gold);">Registrarse</a>
         </p>
         <div id="loginMsg" class="auth-msg" style="display:none;"></div>
@@ -157,9 +335,9 @@ nav button i { font-size:1.2rem; }
     </div>
     <div id="profileSection" style="display:none;">
       <div class="card">
-        <p id="profAnimal" style="font-size:1.8rem;text-align:center;"></p>
+        <p id="profAnimal" style="font-size:2rem;text-align:center;"></p>
         <p id="profName" style="text-align:center;font-weight:700;font-size:1.1rem;"></p>
-        <p id="profSigno" style="text-align:center;color:var(--text-muted);font-size:0.85rem;"></p>
+        <p id="profSigno" style="text-align:center;color:var(--text-muted);font-size:0.8rem;"></p>
         <p id="profPremium" style="text-align:center;margin:10px 0;"></p>
         <div id="premiumSection" style="text-align:center;"></div>
         <button class="btn btn-outline" onclick="logout()" style="width:100%;margin-top:14px;"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
@@ -170,10 +348,10 @@ nav button i { font-size:1.2rem; }
 </div>
 
 <nav>
-  <button class="active" data-tab="horoscope" onclick="showTab('horoscope')"><i class="fas fa-star"></i> Hoy</button>
-  <button data-tab="animals" onclick="showTab('animals')"><i class="fas fa-paw"></i> Signos</button>
-  <button data-tab="compat" onclick="showTab('compat')"><i class="fas fa-heart"></i> Compat</button>
-  <button data-tab="account" onclick="showTab('account')"><i class="fas fa-user"></i> Cuenta</button>
+  <button class="active" data-tab="horoscope"><i class="fas fa-star"></i> Hoy</button>
+  <button data-tab="animals"><i class="fas fa-paw"></i> Signos</button>
+  <button data-tab="compat"><i class="fas fa-heart"></i> Compat</button>
+  <button data-tab="account"><i class="fas fa-user"></i> Cuenta</button>
 </nav>
 
 <script>
@@ -181,12 +359,35 @@ const API = '';
 let token = localStorage.getItem('token');
 let currentUser = null;
 
+const ANIMALS = ['Rata','Buey','Tigre','Conejo','Dragón','Serpiente','Caballo','Cabra','Mono','Gallo','Perro','Cerdo'];
+const EMOJIS = ['🐀','🐂','🐯','🐰','🐉','🐍','🐴','🐐','🐵','🐔','🐶','🐷'];
+
+// Free public domain Chinese zodiac animal images
+const ANIMAL_IMGS = [
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Rat_%28zodiac%29.svg/120px-Rat_%28zodiac%29.svg.png',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Ox_%28zodiac%29.svg/120px-Ox_%28zodiac%29.svg.png',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Tiger_%28zodiac%29.svg/120px-Tiger_%28zodiac%29.svg.png',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Rabbit_%28zodiac%29.svg/120px-Rabbit_%28zodiac%29.svg.png',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Dragon_%28zodiac%29.svg/120px-Dragon_%28zodiac%29.svg.png',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Snake_%28zodiac%29.svg/120px-Snake_%28zodiac%29.svg.png',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Horse_%28zodiac%29.svg/120px-Horse_%28zodiac%29.svg.png',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Goat_%28zodiac%29.svg/120px-Goat_%28zodiac%29.svg.png',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Monkey_%28zodiac%29.svg/120px-Monkey_%28zodiac%29.svg.png',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Rooster_%28zodiac%29.svg/120px-Rooster_%28zodiac%29.svg.png',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Dog_%28zodiac%29.svg/120px-Dog_%28zodiac%29.svg.png',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Pig_%28zodiac%29.svg/120px-Pig_%28zodiac%29.svg.png'
+];
+
 async function api(path, opts={}) {
   const headers = {'Content-Type':'application/json'};
   if (token) headers['Authorization'] = 'Bearer ' + token;
   const r = await fetch(API + path, {...opts, headers});
   if (!r.ok) { const err = await r.json().catch(()=>({detail:r.statusText})); throw new Error(err.detail||err.message||'Error'); }
   return r.json();
+}
+
+function sel(id, opts) {
+  document.getElementById(id).innerHTML = opts;
 }
 
 function showTab(tab) {
@@ -234,14 +435,15 @@ async function fetchProfile() {
     document.getElementById('authSection').style.display='none';
     document.getElementById('profileSection').style.display='block';
     document.getElementById('profName').textContent = d.user.nombre||d.user.email;
-    document.getElementById('profAnimal').textContent = d.user.signo||d.user.animal;
+    const idx = ANIMALS.indexOf(d.user.animal);
+    document.getElementById('profAnimal').textContent = (idx>=0?EMOJIS[idx]:'🐉')+' '+ (d.user.signo||d.user.animal);
     document.getElementById('profSigno').textContent = 'Año ' + d.user.birth_year;
     if (d.user.premium) {
-      document.getElementById('profPremium').innerHTML = '<span class="badge">✦ PREMIUM</span>';
+      document.getElementById('profPremium').innerHTML = '<span class="profile-badge">✦ PREMIUM</span>';
       document.getElementById('premiumSection').innerHTML = '';
     } else {
-      document.getElementById('profPremium').innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Gratuito</span>';
-      document.getElementById('premiumSection').innerHTML = '<button class="btn" onclick="alert(\'Próximamente disponible\')" style="margin:8px auto;"><i class="fas fa-crown"></i> Premium — $2/mes</button>';
+      document.getElementById('profPremium').innerHTML = '<span style="color:var(--text-muted);font-size:0.8rem;">Gratuito</span>';
+      document.getElementById('premiumSection').innerHTML = '<button class="btn" onclick="alert(\'Próximamente disponible\')" style="margin:10px auto;"><i class="fas fa-crown"></i> Premium — $2/mes</button>';
     }
   } catch(e) { logout(); }
 }
@@ -251,9 +453,14 @@ function logout() { token=null; localStorage.removeItem('token'); currentUser=nu
 async function loadAnimals() {
   try {
     const d = await api('/api/animals');
-    const emojis = ['🐀','🐂','🐯','🐰','🐉','🐍','🐴','🐐','🐵','🐔','🐶','🐷'];
     document.getElementById('animalGrid').innerHTML = d.animals.map((a,i) =>
-      `<div class="animal-card" onclick="showAnimal('${a.name}')"><span class="emoji">${emojis[i]}</span><span class="name">${a.name}</span><span class="sub">${a.element} · ${a.polarity}</span></div>`
+      `<div class="animal-card" onclick="showAnimal('${a.name}')">
+        <div class="frame">
+          <img src="${ANIMAL_IMGS[i]}" alt="${a.name}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='block'" />
+          <span class="name">${a.name}</span>
+          <span class="sub">${a.element} · ${a.polarity}</span>
+        </div>
+      </div>`
     ).join('');
   } catch(e) { console.error(e); }
 }
@@ -261,13 +468,15 @@ async function loadAnimals() {
 async function showAnimal(name) {
   try {
     const d = await api('/api/animal/'+name);
+    const idx = ANIMALS.indexOf(d.animal.name);
     const el = document.getElementById('animalDetail');
     el.style.display='block';
-    el.innerHTML = `<h3 style="font-size:1.2rem;color:var(--gold);">${name}</h3>
-      <p><strong>Elemento:</strong> ${d.animal.element} | <strong>${d.animal.polarity}</strong></p>
-      <p><strong>Horas:</strong> ${d.animal.hours} | <strong>${d.animal.seasons}</strong></p>
+    el.innerHTML = `<div style="text-align:center;"><img src="${ANIMAL_IMGS[idx]}" style="width:80px;height:80px;object-fit:contain;margin-bottom:8px;" alt="${d.animal.name}"></div>
+      <h3>${d.animal.name}</h3>
+      <p><strong>Elemento:</strong> ${d.animal.element} · <strong>${d.animal.polarity}</strong> · <strong>${d.animal.branch}</strong></p>
+      <p><strong>Horas:</strong> ${d.animal.hours} · <strong>${d.animal.seasons}</strong></p>
       <p style="margin-top:10px;">${d.personality}</p>
-      <p style="margin-top:10px;"><strong>🍀 Suerte:</strong> Números ${d.lucky.numeros?.join(', ')} · Colores ${d.lucky.colores?.join(', ')}</p>`;
+      <p style="margin-top:10px;color:var(--gold);">🍀 Suerte: Números ${d.lucky.numeros?.join(', ')} · Colores ${d.lucky.colores?.join(', ')}</p>`;
     el.scrollIntoView({behavior:'smooth'});
   } catch(e) { console.error(e); }
 }
@@ -277,17 +486,17 @@ async function calcSign() {
   const el = document.getElementById('calcResult');
   try {
     const d = await api(`/api/calculate?year=${year}&month=${month}&day=${day}`);
-    el.innerHTML = `<div style="text-align:center;padding:10px;background:rgba(180,50,30,0.1);border-radius:8px;"><p style="font-size:2rem;">${['🐀','🐂','🐯','🐰','🐉','🐍','🐴','🐐','🐵','🐔','🐶','🐷'][d.animal.id]}</p><p style="font-size:1.2rem;font-weight:700;color:var(--gold);">${d.animal.name}</p><p style="color:var(--text-muted);font-size:0.85rem;">Elemento: ${d.element} · ${d.animal.polarity}</p><p style="margin-top:8px;font-size:0.85rem;">${d.personality}</p></div>`;
-  } catch(e) { el.innerHTML = 'Error: '+e.message; }
+    el.innerHTML = `<div class="calc-result"><span class="big">${EMOJIS[d.animal.id]}</span><h3>${d.animal.name}</h3><p>Elemento: ${d.element} · ${d.animal.polarity}</p><p style="margin-top:6px;font-size:0.85rem;">${d.personality}</p></div>`;
+  } catch(e) { el.innerHTML = '<p style="color:var(--red);font-size:0.85rem;">Error: '+e.message+'</p>'; }
 }
 
 async function loadDailyHoroscope(animal) {
   const el = document.getElementById('dailyResult');
   el.style.display = 'block';
   try {
-    el.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Consultando el oráculo...</p>';
+    el.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:0.85rem;">Consultando el oráculo...</p>';
     const d = await api('/api/horoscope/' + animal);
-    el.innerHTML = `<h3 style="color:var(--gold);margin-bottom:8px;">${['🐀','🐂','🐯','🐰','🐉','🐍','🐴','🐐','🐵','🐔','🐶','🐷'][['Rata','Buey','Tigre','Conejo','Dragón','Serpiente','Caballo','Cabra','Mono','Gallo','Perro','Cerdo'].indexOf(d.animal)]} ${d.animal}</h3>\n${d.horoscope}`;
+    el.innerHTML = `<h3>${EMOJIS[ANIMALS.indexOf(d.animal)]} ${d.animal}</h3>\n${d.horoscope}`;
     el.scrollIntoView({behavior:'smooth'});
   } catch(e) { el.innerHTML = 'Error: '+e.message; }
 }
@@ -295,32 +504,41 @@ async function loadDailyHoroscope(animal) {
 async function checkCompatibility() {
   const a1 = document.getElementById('compAnimal1').value, a2 = document.getElementById('compAnimal2').value;
   const el = document.getElementById('compResult');
-  if (!a1||!a2) { el.innerHTML='<p style="color:var(--text-muted);">Seleccioná dos animales</p>'; return; }
+  if (!a1||!a2) { el.innerHTML='<p style="color:var(--text-muted);font-size:0.85rem;">Seleccioná dos animales</p>'; return; }
   try {
     const d = await api('/api/compatibility?animal1='+a1+'&animal2='+a2);
     const c = d.compatibility;
-    const colors = {'Excelente':'#d4a017','Buena':'#8bc34a','Neutral':'#ff9800','Desafiante':'#c62828','Conflicto':'#6a1b1a'};
-    el.innerHTML = `<h3>${['🐀','🐂','🐯','🐰','🐉','🐍','🐴','🐐','🐵','🐔','🐶','🐷'][d.animal1.id]} ${d.animal1.name}  ❤️  ${['🐀','🐂','🐯','🐰','🐉','🐍','🐴','🐐','🐵','🐔','🐶','🐷'][d.animal2.id]} ${d.animal2.name}</h3>
+    const colors = {'Excelente':'#d4a017','Buena':'#8bc34a','Neutral':'#ff9800','Desafiante':'#b22222','Conflicto':'#6b1010'};
+    const idx1 = ANIMALS.indexOf(d.animal1.name), idx2 = ANIMALS.indexOf(d.animal2.name);
+    el.innerHTML = `<h3 style="text-align:center;color:var(--gold);">${idx1>=0?EMOJIS[idx1]:''} ${d.animal1.name}  ❤  ${idx2>=0?EMOJIS[idx2]:''} ${d.animal2.name}</h3>
       <div class="compat-bar"><div class="compat-bar-fill" style="width:${c.score}%;background:${colors[c.level]||'#888'};"></div></div>
-      <p style="font-size:1.2rem;font-weight:700;color:${colors[c.level]||'#888'};">${c.level} (${c.score}%)</p>
-      <p>${c.desc}</p>`;
+      <p style="font-size:1.3rem;font-weight:700;text-align:center;color:${colors[c.level]||'#888'};">${c.level} (${c.score}%)</p>
+      <p style="font-size:0.85rem;">${c.desc}</p>`;
   } catch(e) { el.innerHTML = 'Error: '+e.message; }
 }
 
 // Init
-(async function init() {
-  const animals = ['Rata','Buey','Tigre','Conejo','Dragón','Serpiente','Caballo','Cabra','Mono','Gallo','Perro','Cerdo'];
-  const emojis = ['🐀','🐂','🐯','🐰','🐉','🐍','🐴','🐐','🐵','🐔','🐶','🐷'];
+(function init() {
+  // Populate selects
+  const days = Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('');
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'].map((m,i)=>`<option value="${i+1}">${m}</option>`).join('');
+  const years = Array.from({length:100},(_,i)=>`<option value="${2026-i}">${2026-i}</option>`).join('');
+  ['calcDay','regDay'].forEach(id => document.getElementById(id).innerHTML = days);
+  ['calcMonth','regMonth'].forEach(id => document.getElementById(id).innerHTML = months);
+  ['calcYear','regYear'].forEach(id => document.getElementById(id).innerHTML = years);
+
   // Daily grid
-  document.getElementById('dailyGrid').innerHTML = animals.map((a,i) =>
-    `<button onclick="loadDailyHoroscope('${a}')" style="background:var(--bg-card);border:1px solid rgba(180,50,30,0.1);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--text);font-size:0.75rem;transition:0.2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='rgba(180,50,30,0.1)'">${emojis[i]} ${a}</button>`
+  document.getElementById('dailyGrid').innerHTML = ANIMALS.map((a,i) =>
+    `<button onclick="loadDailyHoroscope('${a}')">${EMOJIS[i]} ${a}</button>`
   ).join('');
+
   // Compatibility selects
-  const sel2 = document.getElementById('compAnimal1'), sel3 = document.getElementById('compAnimal2');
-  const opts = animals.map((a,i) => `<option value="${a}">${emojis[i]} ${a}</option>`).join('');
-  sel2.innerHTML = '<option value="">Animal 1</option>'+opts;
-  sel3.innerHTML = '<option value="">Animal 2</option>'+opts;
-  if (token) { try { await fetchProfile(); } catch(e) { logout(); } }
+  ['compAnimal1','compAnimal2'].forEach(id => {
+    document.getElementById(id).innerHTML = '<option value="">— Elegí —</option>' +
+      ANIMALS.map((a,i) => `<option value="${a}">${EMOJIS[i]} ${a}</option>`).join('');
+  });
+
+  if (token) { try { fetchProfile(); } catch(e) { logout(); } }
 })();
 </script>
 </body>
