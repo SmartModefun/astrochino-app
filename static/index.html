@@ -16,7 +16,7 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 
 :root {
-  --bg: #0d0303;
+  --bg: #1a0505;
   --card: rgba(40,10,10,0.85);
   --card-hover: rgba(60,15,15,0.9);
   --red: #c62828;
@@ -25,7 +25,7 @@
   --gold-light: #f0c850;
   --text: #f0e0cc;
   --text-dim: #a08870;
-  --border: rgba(212,160,23,0.12);
+  --border: rgba(212,160,23,0.15);
 }
 
 body {
@@ -43,25 +43,24 @@ body {
 .bg .grad {
   position:absolute; inset:0;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(160,20,20,0.2) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 80%, rgba(212,160,23,0.05) 0%, transparent 50%),
-    radial-gradient(ellipse at 20% 60%, rgba(120,10,10,0.1) 0%, transparent 50%);
+    radial-gradient(ellipse at 50% 0%, rgba(180,20,20,0.25) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(212,160,23,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 60%, rgba(120,10,10,0.15) 0%, transparent 50%);
 }
-/* Chinese ornament pattern - auspicious clouds + meander + medallions */
+/* Chinese ornament pattern - authentic auspicious clouds + meander + medallions */
 .bg .ornament {
-  position:absolute; inset:0; opacity:0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cdefs%3E%3Cpath id='c' d='M50 80 Q70 55 100 70 Q115 50 140 65 Q155 45 180 60 Q195 70 180 85 Q155 75 135 85 Q110 70 90 82 Q70 75 55 88Z' fill='none' stroke='%23d4a017' stroke-width='0.8'/%3E%3Cpath id='k' d='M0 0 L12 0 L12 12 L0 12Z' fill='none' stroke='%23d4a017' stroke-width='0.6'/%3E%3C/defs%3E%3Cuse href='%23c' x='0' y='0'/%3E%3Cuse href='%23c' x='200' y='0'/%3E%3Cuse href='%23c' x='0' y='160'/%3E%3Cuse href='%23c' x='200' y='160'/%3E%3Cuse href='%23c' x='100' y='80' transform='scale(-1,1) translate(-200,0)'/%3E%3Cuse href='%23c' x='300' y='80' transform='scale(-1,1) translate(-600,0)'/%3E%3Ccircle cx='200' cy='300' r='35' fill='none' stroke='%23d4a017' stroke-width='0.5'/%3E%3Ccircle cx='200' cy='300' r='25' fill='none' stroke='%23d4a017' stroke-width='0.3'/%3E%3Ccircle cx='60' cy='300' r='20' fill='none' stroke='%23d4a017' stroke-width='0.4'/%3E%3Ccircle cx='340' cy='300' r='20' fill='none' stroke='%23d4a017' stroke-width='0.4'/%3E%3Ccircle cx='130' cy='370' r='15' fill='none' stroke='%23d4a017' stroke-width='0.3'/%3E%3Ccircle cx='270' cy='370' r='15' fill='none' stroke='%23d4a017' stroke-width='0.3'/%3E%3Cpath d='M0 350 Q50 340 100 350 Q150 340 200 350 Q250 340 300 350 Q350 340 400 350' fill='none' stroke='%23d4a017' stroke-width='0.6'/%3E%3Cpath d='M0 365 Q50 355 100 365 Q150 355 200 365 Q250 355 300 365 Q350 355 400 365' fill='none' stroke='%23d4a017' stroke-width='0.6'/%3E%3C/svg%3E");
-  background-size: 400px 400px;
+  position:absolute; inset:0; opacity:0.12;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500' viewBox='0 0 500 500'%3E%3Cdefs%3E%3Cpath id='yun' d='M40 60 Q55 40 80 50 Q95 30 120 45 Q135 25 160 40 Q175 50 160 65 Q135 55 115 65 Q90 50 70 60 Q55 55 45 68Z' fill='none' stroke='%23d4a017' stroke-width='1.2'/%3E%3Cpath id='yun2' d='M20 90 Q35 70 55 78 Q70 60 90 72 Q100 55 115 68 Q125 75 115 85 Q100 78 85 85 Q65 72 52 80 Q40 76 30 88Z' fill='none' stroke='%23d4a017' stroke-width='1'/%3E%3Cpath id='meander' d='M0 0 L15 0 L15 15 L5 15 L5 5 L10 5 L10 10' fill='none' stroke='%23d4a017' stroke-width='0.8'/%3E%3C/defs%3E%3C!-- top clouds --%3E%3Cuse href='%23yun' x='20' y='10'/%3E%3Cuse href='%23yun' x='180' y='20'/%3E%3Cuse href='%23yun' x='340' y='10'/%3E%3Cuse href='%23yun2' x='100' y='50'/%3E%3Cuse href='%23yun2' x='280' y='45'/%3E%3C!-- middle clouds --%3E%3Cuse href='%23yun' x='0' y='180'/%3E%3Cuse href='%23yun' x='160' y='200' transform='scale(-1,1) translate(-320,0)'/%3E%3Cuse href='%23yun' x='300' y='190'/%3E%3Cuse href='%23yun2' x='60' y='240'/%3E%3Cuse href='%23yun2' x='220' y='250' transform='scale(-1,1) translate(-440,0)'/%3E%3Cuse href='%23yun2' x='380' y='230'/%3E%3C!-- bottom clouds --%3E%3Cuse href='%23yun' x='30' y='350'/%3E%3Cuse href='%23yun' x='190' y='370'/%3E%3Cuse href='%23yun' x='350' y='355'/%3E%3Cuse href='%23yun2' x='110' y='410'/%3E%3Cuse href='%23yun2' x='270' y='420'/%3E%3C!-- medallions --%3E%3Cg transform='translate(250,100)'%3E%3Ccircle cx='0' cy='0' r='30' fill='none' stroke='%23d4a017' stroke-width='0.6'/%3E%3Ccircle cx='0' cy='0' r='22' fill='none' stroke='%23d4a017' stroke-width='0.4'/%3E%3Ccircle cx='0' cy='0' r='14' fill='none' stroke='%23d4a017' stroke-width='0.3'/%3E%3C/g%3E%3Cg transform='translate(250,300)'%3E%3Ccircle cx='0' cy='0' r='28' fill='none' stroke='%23d4a017' stroke-width='0.6'/%3E%3Ccircle cx='0' cy='0' r='20' fill='none' stroke='%23d4a017' stroke-width='0.4'/%3E%3C/g%3E%3Cg transform='translate(70,140)'%3E%3Ccircle cx='0' cy='0' r='20' fill='none' stroke='%23d4a017' stroke-width='0.5'/%3E%3Ccircle cx='0' cy='0' r='13' fill='none' stroke='%23d4a017' stroke-width='0.3'/%3E%3C/g%3E%3Cg transform='translate(430,140)'%3E%3Ccircle cx='0' cy='0' r='20' fill='none' stroke='%23d4a017' stroke-width='0.5'/%3E%3Ccircle cx='0' cy='0' r='13' fill='none' stroke='%23d4a017' stroke-width='0.3'/%3E%3C/g%3E%3C!-- meander border top --%3E%3Cpath d='M0 0 L500 0' stroke='%23d4a017' stroke-width='0.5' opacity='0.4'/%3E%3Cuse href='%23meander' x='20' y='0'/%3E%3Cuse href='%23meander' x='60' y='0'/%3E%3Cuse href='%23meander' x='100' y='0'/%3E%3Cuse href='%23meander' x='140' y='0'/%3E%3Cuse href='%23meander' x='180' y='0'/%3E%3Cuse href='%23meander' x='220' y='0'/%3E%3Cuse href='%23meander' x='260' y='0'/%3E%3Cuse href='%23meander' x='300' y='0'/%3E%3Cuse href='%23meander' x='340' y='0'/%3E%3Cuse href='%23meander' x='380' y='0'/%3E%3Cuse href='%23meander' x='420' y='0'/%3E%3Cuse href='%23meander' x='460' y='0'/%3E%3C!-- meander border bottom --%3E%3Cpath d='M0 500 L500 500' stroke='%23d4a017' stroke-width='0.5' opacity='0.4'/%3E%3Cuse href='%23meander' x='20' y='485'/%3E%3Cuse href='%23meander' x='60' y='485'/%3E%3Cuse href='%23meander' x='100' y='485'/%3E%3Cuse href='%23meander' x='140' y='485'/%3E%3Cuse href='%23meander' x='180' y='485'/%3E%3Cuse href='%23meander' x='220' y='485'/%3E%3Cuse href='%23meander' x='260' y='485'/%3E%3Cuse href='%23meander' x='300' y='485'/%3E%3Cuse href='%23meander' x='340' y='485'/%3E%3Cuse href='%23meander' x='380' y='485'/%3E%3Cuse href='%23meander' x='420' y='485'/%3E%3Cuse href='%23meander' x='460' y='485'/%3E%3C!-- meander side left --%3E%3Cpath d='M0 0 L0 500' stroke='%23d4a017' stroke-width='0.5' opacity='0.4'/%3E%3Cg transform='rotate(90,0,0)'%3E%3Cuse href='%23meander' x='20' y='0'/%3E%3Cuse href='%23meander' x='60' y='0'/%3E%3Cuse href='%23meander' x='100' y='0'/%3E%3Cuse href='%23meander' x='140' y='0'/%3E%3Cuse href='%23meander' x='180' y='0'/%3E%3Cuse href='%23meander' x='220' y='0'/%3E%3Cuse href='%23meander' x='260' y='0'/%3E%3Cuse href='%23meander' x='300' y='0'/%3E%3Cuse href='%23meander' x='340' y='0'/%3E%3Cuse href='%23meander' x='380' y='0'/%3E%3Cuse href='%23meander' x='420' y='0'/%3E%3Cuse href='%23meander' x='460' y='0'/%3E%3C/g%3E%3C!-- meander side right --%3E%3Cpath d='M500 0 L500 500' stroke='%23d4a017' stroke-width='0.5' opacity='0.4'/%3E%3Cg transform='rotate(90,500,0)'%3E%3Cuse href='%23meander' x='20' y='500'/%3E%3Cuse href='%23meander' x='60' y='500'/%3E%3Cuse href='%23meander' x='100' y='500'/%3E%3Cuse href='%23meander' x='140' y='500'/%3E%3Cuse href='%23meander' x='180' y='500'/%3E%3Cuse href='%23meander' x='220' y='500'/%3E%3Cuse href='%23meander' x='260' y='500'/%3E%3Cuse href='%23meander' x='300' y='500'/%3E%3Cuse href='%23meander' x='340' y='500'/%3E%3Cuse href='%23meander' x='380' y='500'/%3E%3Cuse href='%23meander' x='420' y='500'/%3E%3Cuse href='%23meander' x='460' y='500'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 500px 500px;
 }
 /* Fire Horse hero background */
 .bg .horse {
-  position:absolute; top:-10%; left:50%; transform:translateX(-50%);
-  width:600px; height:600px; opacity:0.08;
-  background: url('/static/images/caballo-fuego.webp') center/contain no-repeat;
-  filter: blur(1px);
+  position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:100%; height:100%; opacity:0.06;
+  background: url('/static/images/caballo-fuego.webp') center/cover no-repeat;
 }
 @media(min-width:500px) {
-  .bg .horse { width:800px; height:800px; top:-20%; opacity:0.1; }
+  .bg .horse { opacity:0.08; }
 }
 
 /* particles */
@@ -125,6 +124,9 @@ body {
   color: var(--gold); -webkit-text-fill-color: var(--gold);
 }
 .hd .cn em { color: var(--red); -webkit-text-fill-color: var(--red); font-style:normal; }
+.hd .yi { margin-top:10px; font-size:0.75rem; }
+.hd .yi .yi-b { color:var(--gold); font-weight:700; letter-spacing:2px; }
+.hd .yi .yi-s { color:var(--text-dim); font-size:0.65rem; margin-left:6px; }
 
 /* ── Cards ── */
 .card {
@@ -304,6 +306,7 @@ select:focus, input:focus { outline:none; border-color:var(--gold); }
 <div class="hd">
   <h1>AstroChino</h1>
   <div class="cn">2026 <em>·</em> 丙午</div>
+  <div class="yi"><span class="yi-b">A&ntilde;o del Caballo de Fuego</span><span class="yi-s"> 17 Feb 2026 — 5 Feb 2027</span></div>
 </div>
 
 <!-- ── HOME ── -->
