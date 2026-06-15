@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AstroChino — Horóscopo Chino 2026</title>
+<title>AstroChino — Hor&oacute;scopo Chino 2026</title>
 <style>
 @font-face {
   font-family: 'Kunaroh';
@@ -16,17 +16,16 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 
 :root {
-  --bg: #1a0505;
-  --card: #2a0a0a;
-  --card-hover: #3a0f0f;
+  --bg: #0d0303;
+  --card: rgba(40,10,10,0.85);
+  --card-hover: rgba(60,15,15,0.9);
   --red: #c62828;
-  --red-deep: #6b1010;
+  --red-deep: #5a0808;
   --gold: #d4a017;
   --gold-light: #f0c850;
-  --gold-dim: #8a6010;
-  --text: #f5e6d3;
-  --text-dim: #b09880;
-  --border: rgba(212,160,23,0.15);
+  --text: #f0e0cc;
+  --text-dim: #a08870;
+  --border: rgba(212,160,23,0.12);
 }
 
 body {
@@ -37,337 +36,251 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Dynamic Background ── */
-.bg-layer {
-  position:fixed; top:0; left:0; right:0; bottom:0; z-index:0; pointer-events:none; overflow:hidden;
+/* ── Background ── */
+.bg {
+  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
 }
-.bg-layer .gradient {
+.bg .grad {
   position:absolute; inset:0;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(180,20,20,0.25) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 80%, rgba(212,160,23,0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 20% 60%, rgba(180,20,20,0.08) 0%, transparent 50%);
+    radial-gradient(ellipse at 50% 0%, rgba(160,20,20,0.2) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(212,160,23,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 60%, rgba(120,10,10,0.1) 0%, transparent 50%);
 }
-.bg-layer .pattern {
-  position:absolute; inset:0;
-  opacity:0.06;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cpath d='M30 80 Q50 60 70 80 Q90 60 110 80 Q130 60 150 80 Q170 60 190 80' fill='none' stroke='%23d4a017' stroke-width='1'/%3E%3Cpath d='M20 120 Q40 100 60 120 Q80 100 100 120 Q120 100 140 120 Q160 100 180 120' fill='none' stroke='%23d4a017' stroke-width='1'/%3E%3Ccircle cx='50' cy='30' r='8' fill='none' stroke='%23d4a017' stroke-width='0.5'/%3E%3Ccircle cx='150' cy='30' r='8' fill='none' stroke='%23d4a017' stroke-width='0.5'/%3E%3Ccircle cx='100' cy='150' r='12' fill='none' stroke='%23d4a017' stroke-width='0.5'/%3E%3Cpath d='M40 170 Q60 160 80 170 Q100 160 120 170 Q140 160 160 170' fill='none' stroke='%23d4a017' stroke-width='0.8'/%3E%3C/svg%3E");
-  background-size: 200px 200px;
+/* Chinese ornament pattern - auspicious clouds + meander + medallions */
+.bg .ornament {
+  position:absolute; inset:0; opacity:0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cdefs%3E%3Cpath id='c' d='M50 80 Q70 55 100 70 Q115 50 140 65 Q155 45 180 60 Q195 70 180 85 Q155 75 135 85 Q110 70 90 82 Q70 75 55 88Z' fill='none' stroke='%23d4a017' stroke-width='0.8'/%3E%3Cpath id='k' d='M0 0 L12 0 L12 12 L0 12Z' fill='none' stroke='%23d4a017' stroke-width='0.6'/%3E%3C/defs%3E%3Cuse href='%23c' x='0' y='0'/%3E%3Cuse href='%23c' x='200' y='0'/%3E%3Cuse href='%23c' x='0' y='160'/%3E%3Cuse href='%23c' x='200' y='160'/%3E%3Cuse href='%23c' x='100' y='80' transform='scale(-1,1) translate(-200,0)'/%3E%3Cuse href='%23c' x='300' y='80' transform='scale(-1,1) translate(-600,0)'/%3E%3Ccircle cx='200' cy='300' r='35' fill='none' stroke='%23d4a017' stroke-width='0.5'/%3E%3Ccircle cx='200' cy='300' r='25' fill='none' stroke='%23d4a017' stroke-width='0.3'/%3E%3Ccircle cx='60' cy='300' r='20' fill='none' stroke='%23d4a017' stroke-width='0.4'/%3E%3Ccircle cx='340' cy='300' r='20' fill='none' stroke='%23d4a017' stroke-width='0.4'/%3E%3Ccircle cx='130' cy='370' r='15' fill='none' stroke='%23d4a017' stroke-width='0.3'/%3E%3Ccircle cx='270' cy='370' r='15' fill='none' stroke='%23d4a017' stroke-width='0.3'/%3E%3Cpath d='M0 350 Q50 340 100 350 Q150 340 200 350 Q250 340 300 350 Q350 340 400 350' fill='none' stroke='%23d4a017' stroke-width='0.6'/%3E%3Cpath d='M0 365 Q50 355 100 365 Q150 355 200 365 Q250 355 300 365 Q350 355 400 365' fill='none' stroke='%23d4a017' stroke-width='0.6'/%3E%3C/svg%3E");
+  background-size: 400px 400px;
 }
-/* Floating particles (fire sparks) */
-.particle {
-  position:absolute; width:4px; height:4px;
-  background: var(--gold-light); border-radius:50%;
-  opacity:0; animation: floatUp 8s ease-in infinite;
+/* Fire Horse hero background */
+.bg .horse {
+  position:absolute; top:-10%; left:50%; transform:translateX(-50%);
+  width:600px; height:600px; opacity:0.08;
+  background: url('/static/images/caballo-fuego.webp') center/contain no-repeat;
+  filter: blur(1px);
 }
-.particle:nth-child(1) { left:10%; animation-delay:0s; }
-.particle:nth-child(2) { left:25%; animation-delay:2.4s; width:3px; height:3px; }
-.particle:nth-child(3) { left:40%; animation-delay:5s; }
-.particle:nth-child(4) { left:55%; animation-delay:1.6s; width:5px; height:5px; background:var(--red); }
-.particle:nth-child(5) { left:70%; animation-delay:6s; }
-.particle:nth-child(6) { left:85%; animation-delay:3.6s; width:3px; height:3px; }
-.particle:nth-child(7) { left:15%; animation-delay:7s; width:5px; height:5px; background:var(--red); }
-.particle:nth-child(8) { left:65%; animation-delay:1s; }
-.particle:nth-child(9) { left:35%; animation-delay:4s; }
-.particle:nth-child(10) { left:50%; animation-delay:8s; width:6px; height:6px; background:var(--gold); }
-
-@keyframes floatUp {
-  0% { transform: translateY(100vh) scale(0); opacity:0; }
-  15% { opacity:0.6; }
-  85% { opacity:0.4; }
-  100% { transform: translateY(-10vh) scale(1); opacity:0; }
+@media(min-width:500px) {
+  .bg .horse { width:800px; height:800px; top:-20%; opacity:0.1; }
 }
 
-/* Floating lanterns */
-.lantern {
-  position:absolute; width:30px; height:36px;
-  opacity:0; animation: lanternSway 15s ease-in-out infinite;
-  pointer-events:none;
+/* particles */
+.p { position:absolute; width:3px; height:3px; background:var(--gold-light); border-radius:50%; opacity:0; animation: up 10s ease-in infinite; }
+.p:nth-child(6) { left:8%; animation-delay:0s; }
+.p:nth-child(7) { left:22%; animation-delay:3s; width:4px; height:4px; }
+.p:nth-child(8) { left:38%; animation-delay:6s; }
+.p:nth-child(9) { left:52%; animation-delay:2s; width:5px; height:5px; background:var(--red); }
+.p:nth-child(10) { left:65%; animation-delay:7s; }
+.p:nth-child(11) { left:78%; animation-delay:4s; width:2px; height:2px; }
+.p:nth-child(12) { left:90%; animation-delay:9s; background:var(--red); }
+.p:nth-child(13) { left:45%; animation-delay:5s; width:4px; height:4px; }
+.p:nth-child(14) { left:15%; animation-delay:8s; }
+.p:nth-child(15) { left:60%; animation-delay:1s; width:3px; height:3px; background:var(--gold); }
+@keyframes up {
+  0% { transform:translateY(100vh) scale(0); opacity:0; }
+  20% { opacity:0.5; }
+  80% { opacity:0.3; }
+  100% { transform:translateY(-10vh) scale(1); opacity:0; }
 }
-.lantern::before {
-  content:''; display:block; width:100%; height:100%;
-  background: radial-gradient(ellipse at 50% 60%, var(--red), var(--red-deep));
-  border-radius: 50% 50% 40% 40%;
-  box-shadow: 0 0 20px rgba(180,20,20,0.3);
-}
-.lantern::after {
-  content:''; display:block; width:2px; height:10px;
-  background: var(--gold); margin:0 auto;
-}
-.lantern:nth-child(11) { left:5%; animation-delay:0s; }
-.lantern:nth-child(12) { left:20%; animation-delay:2s; height:30px; width:24px; }
-.lantern:nth-child(13) { left:80%; animation-delay:1s; }
-.lantern:nth-child(14) { left:92%; animation-delay:3s; height:24px; width:20px; }
-.lantern:nth-child(15) { left:45%; animation-delay:4s; height:28px; width:22px; opacity:0.5; }
 
-@keyframes lanternSway {
-  0% { transform: translateY(100vh) rotate(-3deg); opacity:0; }
-  10% { opacity:0.4; }
-  50% { transform: translateY(40vh) rotate(3deg); opacity:0.3; }
-  90% { opacity:0.2; }
-  100% { transform: translateY(-10vh) rotate(-3deg); opacity:0; }
+/* lanterns */
+.ln { position:absolute; opacity:0; animation: sway 20s ease-in-out infinite; pointer-events:none; }
+.ln::before { content:''; display:block; width:28px; height:34px; background:radial-gradient(ellipse at 50% 60%, var(--red), var(--red-deep)); border-radius:50% 50% 40% 40%; box-shadow:0 0 30px rgba(160,10,10,0.2); }
+.ln::after { content:''; display:block; width:2px; height:8px; background:var(--gold); margin:0 auto; }
+.ln:nth-child(16) { left:3%; animation-delay:0s; }
+.ln:nth-child(17) { left:15%; animation-delay:5s; }
+.ln:nth-child(18) { right:10%; animation-delay:3s; }
+.ln:nth-child(19) { right:3%; animation-delay:8s; width:24px; }
+.ln:nth-child(20) { left:50%; animation-delay:10s; width:22px; opacity:0.3; }
+@keyframes sway {
+  0% { transform:translateY(100vh) rotate(-2deg); opacity:0; }
+  15% { opacity:0.35; }
+  50% { transform:translateY(40vh) rotate(2deg); opacity:0.25; }
+  85% { opacity:0.15; }
+  100% { transform:translateY(-10vh) rotate(-2deg); opacity:0; }
 }
 
 /* ── Content ── */
 .content { position:relative; z-index:1; max-width:680px; margin:0 auto; padding:0 12px 120px; }
 
 /* ── Header ── */
-.header {
-  text-align:center; padding:32px 16px 8px;
-  position:relative;
+.hd {
+  text-align:center; padding:36px 16px 8px;
 }
-.header h1 {
+.hd h1 {
   font-family: 'Kunaroh', 'Noto Sans SC', sans-serif;
-  font-size: 2.8rem; font-weight: normal;
-  letter-spacing: 6px;
-  background: linear-gradient(180deg, #f0c850 0%, #d4a017 50%, #b8860b 100%);
+  font-size: 3rem; font-weight: normal; letter-spacing: 8px;
+  background: linear-gradient(180deg, #f0c850 0%, #d4a017 40%, #b8860b 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 25px rgba(212,160,23,0.3));
-  animation: glow 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 30px rgba(212,160,23,0.3));
+  animation: gl 4s ease-in-out infinite;
 }
-@keyframes glow {
+@keyframes gl {
   0%, 100% { filter: drop-shadow(0 0 25px rgba(212,160,23,0.3)); }
   50% { filter: drop-shadow(0 0 45px rgba(212,160,23,0.5)); }
 }
-.header .cn {
-  font-size: 0.85rem; font-weight: 300;
-  color: var(--gold); letter-spacing: 8px; margin-top: 4px;
-  -webkit-text-fill-color: var(--gold);
+.hd .cn {
+  font-size: 0.8rem; font-weight: 300; letter-spacing: 6px; margin-top: 2px;
+  color: var(--gold); -webkit-text-fill-color: var(--gold);
 }
-.header .cn span { color: var(--red); -webkit-text-fill-color: var(--red); }
-.header .sub {
-  font-size: 0.65rem; color: var(--text-dim); font-weight: 300;
-  letter-spacing: 4px; margin-top: 2px;
-  -webkit-text-fill-color: var(--text-dim);
-}
+.hd .cn em { color: var(--red); -webkit-text-fill-color: var(--red); font-style:normal; }
 
-/* ── Year Banner ── */
-.year-strip {
-  text-align:center; padding:12px 16px; margin:10px 12px 14px;
-  background: linear-gradient(90deg, transparent, rgba(212,160,23,0.08), transparent);
-  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
-}
-.year-strip .yimg {
-  width:48px; height:48px; object-fit:cover; display:block; margin:0 auto 6px; border-radius:2px;
-}
-.year-strip .big {
-  font-size:1rem; font-weight:700; color:var(--gold); letter-spacing:1px;
-}
-.year-strip .small {
-  font-size:0.6rem; color:var(--text-dim); letter-spacing:2px; margin-top:2px;
-}
-
-/* ── Card ── */
+/* ── Cards ── */
 .card {
-  background: linear-gradient(145deg, var(--card), rgba(30,8,8,0.8));
+  background: var(--card); backdrop-filter:blur(6px);
   border: 1px solid var(--border);
   padding: 16px; margin-bottom: 12px;
 }
-.card-title {
-  font-size:0.9rem; font-weight:700; color:var(--gold-light);
-  margin-bottom:12px; letter-spacing:1px;
+.card-t {
+  font-size:0.8rem; font-weight:700; color:var(--gold-light);
+  letter-spacing:2px; margin-bottom:10px; text-transform:uppercase;
 }
 
-/* ── Animal Grid (Hero) ── */
-.animal-grid {
-  display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
-}
-.animal-card {
-  cursor:pointer; overflow:hidden;
-  border:1px solid var(--border);
-  transition:0.25s; background:var(--card);
-}
-.animal-card:hover {
-  border-color:var(--gold);
-  transform:translateY(-3px);
-  box-shadow:0 8px 25px rgba(212,160,23,0.1);
-}
-.animal-card img {
-  width:100%; display:block; aspect-ratio:1; object-fit:cover;
-}
-.animal-card .label {
-  padding:6px 8px; text-align:center;
-  font-size:0.75rem; font-weight:700; color:var(--gold);
-  letter-spacing:1px;
-  background: linear-gradient(0deg, rgba(0,0,0,0.3), transparent);
-}
-.animal-card .sub {
-  font-size:0.6rem; color:var(--text-dim); font-weight:300;
-  margin-top:-2px;
-}
-
-/* ── Modal ── */
-.modal-overlay {
-  display:none; position:fixed; z-index:100; inset:0;
-  background:rgba(0,0,0,0.8); backdrop-filter:blur(4px);
-  align-items:center; justify-content:center;
-}
-.modal-overlay.show { display:flex; }
-.modal {
-  background: #1a0808; border:1px solid var(--gold);
-  max-width:480px; width:92%; max-height:92vh; overflow-y:auto;
-  animation: fadeIn 0.2s ease;
-}
-@keyframes fadeIn {
-  from { opacity:0; transform:scale(0.95); }
-  to { opacity:1; transform:scale(1); }
-}
-.modal-close {
-  position:sticky; top:8px; float:right; margin:8px 12px 0 0;
-  background: rgba(0,0,0,0.5); border:1px solid var(--border);
-  color:var(--text-dim); width:32px; height:32px;
-  font-size:1rem; cursor:pointer; z-index:2;
-  font-family:'Noto Sans SC', sans-serif;
-}
-.modal-img {
-  width:100%; aspect-ratio:1; object-fit:cover;
-}
-.modal-body { padding:16px 20px 20px; }
-.modal-body h2 {
-  font-size:1.3rem; font-weight:700; color:var(--gold);
-  letter-spacing:2px; margin-bottom:4px;
-}
-.modal-body .meta { font-size:0.72rem; color:var(--text-dim); margin-bottom:12px; }
-.modal-section { margin-bottom:14px; }
-.modal-section h3 {
-  font-size:0.72rem; font-weight:400; color:var(--gold);
-  letter-spacing:2px; text-transform:uppercase;
-  border-bottom:1px solid var(--border); padding-bottom:3px; margin-bottom:6px;
-}
-.modal-section p { font-size:0.82rem; line-height:1.7; }
-.modal-section .tags { display:flex; flex-wrap:wrap; gap:4px; }
-.modal-section .tag {
-  padding:2px 10px; background:rgba(212,160,23,0.08);
-  border:1px solid rgba(212,160,23,0.15);
-  font-size:0.7rem; color:var(--gold-light);
-}
-.modal-years { display:flex; flex-wrap:wrap; gap:4px; }
-.modal-years .y {
-  padding:2px 10px; background:rgba(0,0,0,0.3);
-  border:1px solid var(--border);
-  font-size:0.72rem; color:var(--text);
-}
-
-/* ── Horoscope List ── */
-.horo-item {
-  display:flex; align-items:center; gap:10px; padding:10px;
-  border:1px solid var(--border); margin-bottom:6px;
-  cursor:pointer; transition:0.2s;
-}
-.horo-item:hover { border-color:var(--gold); background:var(--card-hover); }
-.horo-item img { width:44px; height:44px; object-fit:cover; flex-shrink:0; }
-.horo-item .info { flex:1; min-width:0; }
-.horo-item .info .name { font-weight:700; font-size:0.8rem; color:var(--gold); }
-.horo-item .info .prev { font-size:0.7rem; color:var(--text-dim); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.horo-item .arr { color:var(--gold); opacity:0.4; font-size:1.2rem; }
-.horo-exp {
-  padding:14px; margin-top:-2px; margin-bottom:6px;
-  border:1px solid var(--gold); background:var(--card);
-  animation: fadeIn 0.2s ease;
-}
-.horo-exp .top { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-.horo-exp .top img { width:40px; height:40px; object-fit:cover; }
-.horo-exp .top .name { font-weight:700; font-size:0.85rem; color:var(--gold); }
-.horo-exp .top .date { font-size:0.65rem; color:var(--text-dim); }
-.horo-exp .text { font-size:0.8rem; line-height:1.7; white-space:pre-wrap; }
-.horo-exp .lucky { font-size:0.7rem; color:var(--gold); margin-top:8px; padding-top:6px; border-top:1px solid var(--border); }
-
-/* ── Period Tabs ── */
-.period-tabs { display:flex; gap:4px; margin-bottom:12px; overflow-x:auto; }
-.period-tabs button {
-  padding:6px 14px; border:1px solid var(--border);
-  background: rgba(0,0,0,0.3); color:var(--text-dim);
-  cursor:pointer; font-size:0.68rem; font-family:'Noto Sans SC', sans-serif;
-  white-space:nowrap; transition:0.2s;
-}
-.period-tabs button.active { border-color:var(--gold); color:var(--gold); background:rgba(212,160,23,0.08); }
-.period-tabs button:hover { border-color:var(--gold); color:var(--gold); }
-
-/* ── Calc ── */
-.calc-row { display:flex; gap:6px; }
-.calc-row select { flex:1; min-width:0; }
-
-/* ── Form Elements ── */
-select, input {
-  padding:9px 10px; border:1px solid var(--border);
-  background: rgba(0,0,0,0.3); color:var(--text);
-  font-family:'Noto Sans SC', sans-serif; font-size:0.78rem;
+/* ── Calc Row ── */
+.cr { display:flex; gap:6px; }
+.cr select, input, select {
+  flex:1; padding:9px 10px; border:1px solid var(--border);
+  background: rgba(0,0,0,0.4); color:var(--text);
+  font-family:'Noto Sans SC', sans-serif; font-size:0.75rem;
+  border-radius:2px;
 }
 select:focus, input:focus { outline:none; border-color:var(--gold); }
 
-/* ── Buttons ── */
+/* ── Button ── */
 .btn {
   display:inline-block; padding:10px 24px; border:none; cursor:pointer;
-  font-family:'Noto Sans SC', sans-serif; font-size:0.75rem; font-weight:700;
-  letter-spacing:1px;
+  font-family:'Noto Sans SC', sans-serif; font-size:0.72rem; font-weight:700;
+  letter-spacing:2px; text-transform:uppercase;
   background: linear-gradient(180deg, var(--red), var(--red-deep));
-  color: var(--gold-light); transition:0.2s;
+  color: var(--gold); transition:0.2s;
 }
-.btn:hover { filter:brightness(1.15); }
-.btn-full { width:100%; margin-top:8px; }
-.btn-sm { padding:7px 18px; font-size:0.7rem; }
-.btn-gold {
-  background: linear-gradient(180deg, var(--gold), #a67c00);
-  color: #1a0505;
-}
-.btn-outline { background:transparent; border:1px solid var(--gold); color:var(--gold); }
+.btn:hover { filter:brightness(1.2); }
+.btn-f { width:100%; margin-top:8px; }
 
-/* ── Compat ── */
-.comp-disp { text-align:center; padding:10px 0; }
-.comp-disp .pair { display:flex; align-items:center; justify-content:center; gap:12px; margin:8px 0; }
-.comp-disp .pair img { width:48px; height:48px; object-fit:cover; }
-.comp-disp .pair .name { font-size:0.85rem; color:var(--gold); font-weight:700; }
-.comp-disp .pair .heart { color:var(--red); font-size:1.3rem; }
-.comp-bar { height:5px; background:rgba(255,255,255,0.05); overflow:hidden; margin:8px 0; }
-.comp-bar-fill { height:100%; transition:width 0.5s; }
-.comp-level { font-size:1rem; font-weight:700; text-align:center; }
-.comp-desc { font-size:0.78rem; color:var(--text-dim); text-align:center; margin-top:6px; }
+/* ── Animal Grid ── */
+.ag { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.ac {
+  cursor:pointer; border:1px solid var(--border); overflow:hidden;
+  transition:0.25s; background:rgba(30,8,8,0.6);
+}
+.ac:hover { border-color:var(--gold); transform:translateY(-2px); box-shadow:0 6px 20px rgba(212,160,23,0.08); }
+.ac img { width:100%; display:block; aspect-ratio:1; object-fit:cover; }
+.ac .lbl { padding:5px 6px 6px; text-align:center; background:rgba(0,0,0,0.2); }
+.ac .lbl .n { font-size:0.72rem; font-weight:700; color:var(--gold); letter-spacing:1px; }
+.ac .lbl .s { font-size:0.58rem; color:var(--text-dim); margin-top:1px; }
+
+/* ── Modal ── */
+.mo {
+  display:none; position:fixed; z-index:100; inset:0;
+  background:rgba(0,0,0,0.85); backdrop-filter:blur(4px);
+  align-items:center; justify-content:center;
+}
+.mo.s { display:flex; }
+.m {
+  background:#1a0808; border:1px solid var(--gold);
+  max-width:480px; width:92%; max-height:92vh; overflow-y:auto;
+  animation:fi .25s ease;
+}
+@keyframes fi { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+.m-x {
+  position:sticky; top:8px; float:right; margin:8px 12px 0 0;
+  background:rgba(0,0,0,0.5); border:1px solid var(--border);
+  color:var(--text-dim); width:30px; height:30px; cursor:pointer;
+  font-family:'Noto Sans SC', sans-serif; font-size:0.9rem;
+}
+.m-img { width:100%; aspect-ratio:1; object-fit:cover; }
+.m-b { padding:14px 18px 18px; }
+.m-b h2 { font-size:1.2rem; font-weight:700; color:var(--gold); letter-spacing:1px; }
+.m-b .mt { font-size:0.7rem; color:var(--text-dim); margin-bottom:10px; }
+.ms { margin-bottom:12px; }
+.ms h3 { font-size:0.68rem; font-weight:400; color:var(--gold); letter-spacing:2px; text-transform:uppercase; border-bottom:1px solid var(--border); padding-bottom:3px; margin-bottom:5px; }
+.ms p { font-size:0.8rem; line-height:1.6; }
+.ms .tg { display:flex; flex-wrap:wrap; gap:4px; font-size:0.7rem; color:var(--gold-light); }
+.ys { display:flex; flex-wrap:wrap; gap:4px; }
+.ys .y { padding:2px 10px; background:rgba(0,0,0,0.3); border:1px solid var(--border); font-size:0.7rem; }
+
+/* ── Horoscope ── */
+.hi {
+  display:flex; align-items:center; gap:10px; padding:10px;
+  border:1px solid var(--border); margin-bottom:5px; cursor:pointer; transition:0.2s;
+}
+.hi:hover { border-color:var(--gold); background:rgba(60,15,15,0.5); }
+.hi img { width:40px; height:40px; object-fit:cover; flex-shrink:0; }
+.hi .inf { flex:1; min-width:0; }
+.hi .inf .n { font-weight:700; font-size:0.78rem; color:var(--gold); }
+.hi .inf .p { font-size:0.68rem; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hi .ar { color:var(--gold); opacity:0.3; font-size:1.1rem; }
+.he {
+  padding:12px; margin-top:-2px; margin-bottom:5px;
+  border:1px solid var(--gold); background:rgba(30,8,8,0.6);
+  animation:fi .2s ease;
+}
+.he .tp { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+.he .tp img { width:36px; height:36px; object-fit:cover; }
+.he .tp .nn { font-weight:700; font-size:0.8rem; color:var(--gold); }
+.he .tp .dd { font-size:0.62rem; color:var(--text-dim); }
+.he .tx { font-size:0.78rem; line-height:1.6; white-space:pre-wrap; }
+.he .lu { font-size:0.68rem; color:var(--gold); margin-top:6px; padding-top:5px; border-top:1px solid var(--border); }
+
+/* ── Period Tabs ── */
+.pt { display:flex; gap:4px; margin-bottom:10px; overflow-x:auto; }
+.pt button {
+  padding:5px 12px; border:1px solid var(--border);
+  background:rgba(0,0,0,0.3); color:var(--text-dim);
+  cursor:pointer; font-size:0.65rem; font-family:'Noto Sans SC', sans-serif;
+  white-space:nowrap; transition:0.2s; text-transform:uppercase; letter-spacing:1px;
+}
+.pt button.a { border-color:var(--gold); color:var(--gold); background:rgba(212,160,23,0.08); }
+.pt button:hover { border-color:var(--gold); color:var(--gold); }
 
 /* ── Calc Result ── */
-.calc-res {
-  text-align:center; padding:12px; margin-top:8px;
-  border:1px solid var(--border);
-}
-.calc-res img { width:64px; height:64px; object-fit:cover; margin-bottom:4px; }
-.calc-res h3 { font-size:1rem; color:var(--gold); }
-.calc-res p { font-size:0.75rem; color:var(--text-dim); margin-top:4px; }
+.cr2 { text-align:center; padding:10px; margin-top:8px; border:1px solid var(--border); }
+.cr2 img { width:60px; height:60px; object-fit:cover; margin-bottom:4px; }
+.cr2 h3 { font-size:0.9rem; color:var(--gold); }
+.cr2 p { font-size:0.72rem; color:var(--text-dim); }
+
+/* ── Compat ── */
+.cd { text-align:center; padding:8px 0; }
+.cd .pr { display:flex; align-items:center; justify-content:center; gap:10px; margin:6px 0; }
+.cd .pr img { width:44px; height:44px; object-fit:cover; }
+.cd .pr .nn { font-size:0.8rem; color:var(--gold); font-weight:700; }
+.cd .pr .hrt { color:var(--red); font-size:1.2rem; }
+.cd .cb { height:4px; background:rgba(255,255,255,0.04); overflow:hidden; margin:6px 0; }
+.cd .cbf { height:100%; transition:width .5s; }
+.cd .lv { font-size:0.9rem; font-weight:700; }
+.cd .ds { font-size:0.75rem; color:var(--text-dim); margin-top:5px; }
 
 /* ── Auth ── */
-.auth-msg { margin-top:6px; padding:6px; font-size:0.72rem; display:none; }
-.auth-msg.error { display:block; background:rgba(180,30,30,0.15); border-left:2px solid var(--red); color:#ff6b6b; }
-.auth-msg.success { display:block; background:rgba(76,175,80,0.1); border-left:2px solid #4caf50; color:#69f0ae; }
-.profile-badge {
-  display:inline-block; background:linear-gradient(135deg,var(--gold),#a67c00);
-  color:#1a0505; padding:2px 12px; font-size:0.65rem; font-weight:700;
-}
+.msg { margin-top:6px; padding:6px; font-size:0.68rem; display:none; }
+.msg.e { display:block; background:rgba(180,30,30,0.12); border-left:2px solid var(--red); color:#ff6b6b; }
+.msg.s { display:block; background:rgba(76,175,80,0.08); border-left:2px solid #4caf50; color:#69f0ae; }
+.pb { display:inline-block; background:linear-gradient(135deg,var(--gold),#a67c00); color:#0d0303; padding:2px 12px; font-size:0.6rem; font-weight:700; letter-spacing:1px; }
 
 /* ── Nav ── */
-.nav {
+.nv {
   position:fixed; bottom:0; left:0; right:0; z-index:50;
   display:flex; justify-content:space-around;
-  background: linear-gradient(180deg, rgba(26,5,5,0.97), rgba(26,5,5,1));
+  background: linear-gradient(180deg, rgba(13,3,3,0.97), rgba(13,3,3,1));
   border-top:1px solid var(--border);
-  padding:6px 0 14px; max-width:680px; margin:0 auto;
+  padding:5px 0 14px; max-width:680px; margin:0 auto;
 }
-.nav button {
+.nv button {
   background:none; border:none; color:var(--text-dim);
-  font-size:0.6rem; cursor:pointer;
+  font-size:0.55rem; cursor:pointer;
   display:flex; flex-direction:column; align-items:center;
-  gap:2px; padding:4px 14px;
+  gap:1px; padding:3px 14px;
   font-family:'Noto Sans SC', sans-serif; letter-spacing:0.5px;
-  transition:0.2s;
+  transition:0.2s; text-transform:uppercase;
 }
-.nav button.active { color:var(--gold); }
-.nav button i { font-size:1.1rem; filter:brightness(0.6); }
-.nav button.active i { filter:brightness(1); }
+.nv button.a { color:var(--gold); }
+.nv button i { font-size:1rem; filter:brightness(0.5); }
+.nv button.a i { filter:brightness(1); }
 
-/* ── Section Tabs ── */
-.section { display:none; }
-.section.active { display:block; }
+.sec { display:none; }
+.sec.a { display:block; }
 
-/* ── Footer ── */
-.footer { text-align:center; padding:20px 0; font-size:0.6rem; color:var(--text-dim); opacity:0.4; letter-spacing:2px; }
+.ft { text-align:center; padding:18px 0; font-size:0.55rem; color:var(--text-dim); opacity:0.3; letter-spacing:3px; }
 
 ::-webkit-scrollbar { width:3px; }
 ::-webkit-scrollbar-track { background:var(--bg); }
@@ -377,413 +290,315 @@ select:focus, input:focus { outline:none; border-color:var(--gold); }
 </head>
 <body>
 
-<div class="bg-layer">
-  <div class="gradient"></div>
-  <div class="pattern"></div>
-  <div class="particle"></div><div class="particle"></div><div class="particle"></div>
-  <div class="particle"></div><div class="particle"></div><div class="particle"></div>
-  <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
-  <div class="lantern"></div><div class="lantern"></div><div class="lantern"></div><div class="lantern"></div><div class="lantern"></div>
+<div class="bg">
+  <div class="grad"></div>
+  <div class="ornament"></div>
+  <div class="horse"></div>
+  <div class="p"></div><div class="p"></div><div class="p"></div><div class="p"></div><div class="p"></div>
+  <div class="p"></div><div class="p"></div><div class="p"></div><div class="p"></div><div class="p"></div>
+  <div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div>
 </div>
 
 <div class="content">
 
-<div class="header">
+<div class="hd">
   <h1>AstroChino</h1>
-  <div class="cn">2026 <span>·</span> 丙午</div>
-  <div class="sub">Caballo de Fuego</div>
-</div>
-
-<div class="year-strip" id="yearStrip">
-  <img class="yimg" src="/static/images/caballo-fuego.webp" alt="Caballo de Fuego">
-  <div class="big">Ano del Caballo de Fuego · 丙午 · Ano 4724</div>
-  <div class="small">17 Feb 2026 — 5 Feb 2027</div>
+  <div class="cn">2026 <em>·</em> 丙午</div>
 </div>
 
 <!-- ── HOME ── -->
-<div class="section active" id="tab-home">
-  <div id="animalGrid" class="animal-grid"></div>
-
-  <div class="card" style="margin-top:14px;">
-    <div class="card-title">Tu signo</div>
-    <div class="calc-row">
-      <select id="calcDay2"></select>
-      <select id="calcMonth2"></select>
-      <select id="calcYear2"></select>
+<div class="sec a" id="th">
+  <div class="card">
+    <div class="card-t">Tu signo</div>
+    <div class="cr">
+      <select id="cd"></select>
+      <select id="cm"></select>
+      <select id="cy"></select>
     </div>
-    <button class="btn btn-full" onclick="calcSign2()">Descubrir</button>
-    <div id="calcResult2"></div>
+    <button class="btn btn-f" onclick="cs()">Descubrir</button>
+    <div id="cr2"></div>
   </div>
 
-  <div style="margin-top:16px;">
-    <div class="period-tabs" id="periodNav"></div>
-    <div id="horoList"></div>
+  <div class="ag" id="ag"></div>
+
+  <div style="margin-top:14px;">
+    <div class="pt" id="pn"></div>
+    <div id="hl"></div>
   </div>
 </div>
 
 <!-- ── SIGNOS ── -->
-<div class="section" id="tab-signos">
-  <div class="card">
-    <div class="card-title">Los 12 Animales</div>
-    <div class="animal-grid" id="signosGrid"></div>
-  </div>
+<div class="sec" id="ts">
+  <div class="ag" id="sg"></div>
 </div>
 
 <!-- ── COMPAT ── -->
-<div class="section" id="tab-compat">
+<div class="sec" id="tc">
   <div class="card">
-    <div class="card-title">Compatibilidad</div>
-    <div class="calc-row">
-      <select id="comp1"></select>
-      <select id="comp2"></select>
+    <div class="card-t">Compatibilidad</div>
+    <div class="cr">
+      <select id="c1"></select>
+      <select id="c2"></select>
     </div>
-    <button class="btn btn-full" onclick="checkCompat()">Consultar</button>
-    <div id="compResult"></div>
-  </div>
-  <div class="card">
-    <div class="card-title">Tu signo</div>
-    <div class="calc-row">
-      <select id="calcDay"></select>
-      <select id="calcMonth"></select>
-      <select id="calcYear"></select>
-    </div>
-    <button class="btn btn-full" onclick="calcSign()">Descubrir</button>
-    <div id="calcResult"></div>
+    <button class="btn btn-f" onclick="cc()">Consultar</button>
+    <div id="cres"></div>
   </div>
 </div>
 
 <!-- ── CUENTA ── -->
-<div class="section" id="tab-cuenta">
-  <div id="authSection">
-    <div class="card" id="registerForm">
-      <div class="card-title">Crear Cuenta</div>
-      <input type="email" id="regEmail" placeholder="Email" style="width:100%;margin-bottom:6px;">
-      <input type="text" id="regName" placeholder="Nombre" style="width:100%;margin-bottom:6px;">
-      <input type="password" id="regPass" placeholder="Contraseña" style="width:100%;margin-bottom:8px;">
-      <label style="font-size:0.68rem;color:var(--text-dim);">Fecha de nacimiento</label>
-      <div class="calc-row">
-        <select id="regDay"></select>
-        <select id="regMonth"></select>
-        <select id="regYear"></select>
+<div class="sec" id="tu">
+  <div id="as">
+    <div class="card" id="rf">
+      <div class="card-t">Crear Cuenta</div>
+      <input type="email" id="re" placeholder="Email" style="width:100%;margin-bottom:5px;">
+      <input type="text" id="rn" placeholder="Nombre" style="width:100%;margin-bottom:5px;">
+      <input type="password" id="rp" placeholder="Contrase&ntilde;a" style="width:100%;margin-bottom:6px;">
+      <label style="font-size:0.65rem;color:var(--text-dim);">Fecha de nacimiento</label>
+      <div class="cr">
+        <select id="rd"></select>
+        <select id="rm"></select>
+        <select id="ry"></select>
       </div>
-      <button class="btn btn-full" onclick="register()">Registrarse</button>
-      <div id="regMsg" class="auth-msg"></div>
-      <p style="margin-top:8px;font-size:0.68rem;text-align:center;color:var(--text-dim);">
-        Ya tenés cuenta? <a href="#" onclick="toggleAuth(true)" style="color:var(--gold);">Iniciar sesion</a>
+      <button class="btn btn-f" onclick="reg()">Registrarse</button>
+      <div id="rmsg" class="msg"></div>
+      <p style="margin-top:6px;font-size:0.65rem;text-align:center;color:var(--text-dim);">
+        Ya ten&eacute;s cuenta? <a href="#" onclick="ta(1)" style="color:var(--gold);">Iniciar sesi&oacute;n</a>
       </p>
     </div>
-    <div class="card" id="loginForm" style="display:none;">
-      <div class="card-title">Iniciar Sesion</div>
-      <input type="email" id="loginEmail" placeholder="Email" style="width:100%;margin-bottom:6px;">
-      <input type="password" id="loginPass" placeholder="Contrasena" style="width:100%;margin-bottom:8px;">
-      <button class="btn btn-full" onclick="login()">Ingresar</button>
-      <div id="loginMsg" class="auth-msg"></div>
-      <p style="margin-top:8px;font-size:0.68rem;text-align:center;color:var(--text-dim);">
-        No tenes cuenta? <a href="#" onclick="toggleAuth(false)" style="color:var(--gold);">Registrarse</a>
+    <div class="card" id="lf" style="display:none;">
+      <div class="card-t">Iniciar Sesi&oacute;n</div>
+      <input type="email" id="le" placeholder="Email" style="width:100%;margin-bottom:5px;">
+      <input type="password" id="lp" placeholder="Contrase&ntilde;a" style="width:100%;margin-bottom:6px;">
+      <button class="btn btn-f" onclick="lin()">Ingresar</button>
+      <div id="lmsg" class="msg"></div>
+      <p style="margin-top:6px;font-size:0.65rem;text-align:center;color:var(--text-dim);">
+        No ten&eacute;s cuenta? <a href="#" onclick="ta(0)" style="color:var(--gold);">Registrarse</a>
       </p>
     </div>
   </div>
-  <div id="profileSection" style="display:none;">
+  <div id="ps" style="display:none;">
     <div class="card" style="text-align:center;">
-      <img id="profImg" src="" alt="" style="width:72px;height:72px;object-fit:cover;margin:0 auto 6px;display:block;">
-      <div style="font-weight:700;font-size:0.9rem;" id="profName"></div>
-      <div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px;" id="profSub"></div>
-      <div style="margin:10px 0;" id="profPremium"></div>
-      <div id="premiumSection"></div>
-      <button class="btn btn-sm btn-outline" onclick="logout()" style="margin-top:10px;">Cerrar sesion</button>
-      <div id="profileMsg" class="auth-msg"></div>
+      <img id="pi" src="" alt="" style="width:64px;height:64px;object-fit:cover;margin:0 auto 6px;display:block;">
+      <div style="font-weight:700;font-size:0.85rem;" id="pn2"></div>
+      <div style="font-size:0.68rem;color:var(--text-dim);margin-top:2px;" id="ps2"></div>
+      <div style="margin:8px 0;" id="pp"></div>
+      <div id="prs"></div>
+      <button class="btn btn-sm" onclick="lo()" style="margin-top:8px;font-size:0.65rem;">Cerrar sesi&oacute;n</button>
+      <div id="pmsg" class="msg"></div>
     </div>
   </div>
 </div>
 
-<div class="footer">AstroChino 2026</div>
+<div class="ft">AstroChino 2026</div>
 </div>
 
-<div class="nav">
-  <button class="active" data-tab="home"><i class="fas fa-star"></i> Hoy</button>
-  <button data-tab="signos"><i class="fas fa-dragon"></i> Signos</button>
-  <button data-tab="compat"><i class="fas fa-yin-yang"></i> Compat</button>
-  <button data-tab="cuenta"><i class="fas fa-user"></i> Cuenta</button>
+<div class="nv">
+  <button class="a" data-tab="th"><i class="fas fa-star"></i> Hoy</button>
+  <button data-tab="ts"><i class="fas fa-dragon"></i> Signos</button>
+  <button data-tab="tc"><i class="fas fa-yin-yang"></i> Compat</button>
+  <button data-tab="tu"><i class="fas fa-user"></i> Cuenta</button>
 </div>
 
-<div class="modal-overlay" id="animalModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal()">X</button>
-    <img class="modal-img" id="modalImg" src="" alt="">
-    <div class="modal-body">
-      <h2 id="modalName"></h2>
-      <div class="meta" id="modalMeta"></div>
-      <div class="modal-section">
-        <h3>Personalidad</h3>
-        <p id="modalPersonality"></p>
-      </div>
-      <div class="modal-section">
-        <h3>Anos de este signo</h3>
-        <div class="modal-years" id="modalYears"></div>
-      </div>
-      <div class="modal-section">
-        <h3>Elementos</h3>
-        <div class="tags" id="modalElement"></div>
-      </div>
-      <div class="modal-section">
-        <h3>Suerte</h3>
-        <p id="modalLucky"></p>
-      </div>
-      <div class="modal-section">
-        <h3>Compatibilidad</h3>
-        <p id="modalCompat"></p>
-      </div>
+<div class="mo" id="am">
+  <div class="m">
+    <button class="m-x" onclick="cm()">X</button>
+    <img class="m-img" id="mi" src="" alt="">
+    <div class="m-b">
+      <h2 id="mn"></h2>
+      <div class="mt" id="mm"></div>
+      <div class="ms"><h3>Personalidad</h3><p id="mp"></p></div>
+      <div class="ms"><h3>A&ntilde;os de este signo</h3><div class="ys" id="my"></div></div>
+      <div class="ms"><h3>Elementos</h3><div class="tg" id="me"></div></div>
+      <div class="ms"><h3>Suerte</h3><p id="ml"></p></div>
+      <div class="ms"><h3>Compatibilidad</h3><p id="mc"></p></div>
     </div>
   </div>
 </div>
 
 <script>
-const API = '';
-let token = localStorage.getItem('token');
-let currentPeriod = 'today';
+const A = 'Rata,Buey,Tigre,Conejo,Drag\u00f3n,Serpiente,Caballo,Cabra,Mono,Gallo,Perro,Cerdo'.split(',');
+const AI = A.map(a => '/static/images/'+a+'.jpg');
+const YRS = A.map((_,i) => { const b=2020+i, y=[]; for(let yr=b;yr>=1900;yr-=12) y.push(yr); for(let yr=b+12;yr<=2040;yr+=12) y.push(yr); return y.sort((a,b)=>b-a); });
+const ST = {'Rata':['Amatista','Ojo de tigre','Cuarzo rosa'],'Buey':['Jade','Onix','Agata'],'Tigre':['Ojo de halcon','Citrino','Granate'],'Conejo':['Jade blanco','Cuarzo rosa','Perla'],'Drag\u00f3n':['Jade verde','Opalo','Rubi'],'Serpiente':['Ojo de gato','Malaquita','Turquesa'],'Caballo':['Granate','Cornalina','Ojo de tigre'],'Cabra':['Cuarzo rosa','Jade','Amatista'],'Mono':['Obsidiana','Lapislazuli','Citrino'],'Gallo':['Topacio','Ambar','Ojo de halcon'],'Perro':['Zafiro','Onix','Jade'],'Cerdo':['Rubi','Turmalina','Cuarzo']};
+const CB = {'Rata':'Excelente con Drag\u00f3n y Mono.','Buey':'Excelente con Serpiente y Gallo.','Tigre':'Excelente con Caballo y Perro.','Conejo':'Excelente con Cerdo y Cabra.','Drag\u00f3n':'Excelente con Rata y Mono.','Serpiente':'Excelente con Gallo y Buey.','Caballo':'Excelente con Tigre y Perro.','Cabra':'Excelente con Cerdo y Conejo.','Mono':'Excelente con Rata y Drag\u00f3n.','Gallo':'Excelente con Buey y Serpiente.','Perro':'Excelente con Tigre y Caballo.','Cerdo':'Excelente con Conejo y Cabra.'};
+let tk = localStorage.getItem('token');
+let cp = 'today';
 
-const ANIMALS = ['Rata','Buey','Tigre','Conejo','Drag\u00f3n','Serpiente','Caballo','Cabra','Mono','Gallo','Perro','Cerdo'];
-const ANIMAL_IMGS = [
-  '/static/images/Rata.jpg','/static/images/Buey.jpg','/static/images/Tigre.jpg',
-  '/static/images/Conejo.jpg','/static/images/Drag\u00f3n.jpg','/static/images/Serpiente.jpg',
-  '/static/images/Caballo.jpg','/static/images/Cabra.jpg','/static/images/Mono.jpg',
-  '/static/images/Gallo.jpg','/static/images/Perro.jpg','/static/images/Cerdo.jpg'
-];
-
-const YEARS = ANIMALS.map((_, i) => {
-  const base = 2020 + i;
-  const y = [];
-  for (let yr = base; yr >= 1900; yr -= 12) y.push(yr);
-  for (let yr = base + 12; yr <= 2040; yr += 12) y.push(yr);
-  return y.sort((a,b)=>b-a);
-});
-
-const STONES = {
-  'Rata':['Amatista','Ojo de tigre','Cuarzo rosa'],
-  'Buey':['Jade','Onix','Agata'],
-  'Tigre':['Ojo de halcon','Citrino','Granate'],
-  'Conejo':['Jade blanco','Cuarzo rosa','Perla'],
-  'Drag\u00f3n':['Jade verde','Opalo','Rubi'],
-  'Serpiente':['Ojo de gato','Malaquita','Turquesa'],
-  'Caballo':['Granate','Cornalina','Ojo de tigre'],
-  'Cabra':['Cuarzo rosa','Jade','Amatista'],
-  'Mono':['Obsidiana','Lapislazuli','Citrino'],
-  'Gallo':['Topacio','Ambar','Ojo de halcon'],
-  'Perro':['Zafiro','Onix','Jade'],
-  'Cerdo':['Rubi','Turmalina','Cuarzo']
-};
-const COMPAT_BRIEF = {
-  'Rata':'Excelente con Drag\u00f3n y Mono. Desafiante con Caballo.',
-  'Buey':'Excelente con Serpiente y Gallo. Desafiante con Cabra.',
-  'Tigre':'Excelente con Caballo y Perro. Desafiante con Mono.',
-  'Conejo':'Excelente con Cerdo y Cabra. Desafiante con Gallo.',
-  'Drag\u00f3n':'Excelente con Rata y Mono. Desafiante con Perro.',
-  'Serpiente':'Excelente con Gallo y Buey. Desafiante con Cerdo.',
-  'Caballo':'Excelente con Tigre y Perro. Desafiante con Rata.',
-  'Cabra':'Excelente con Cerdo y Conejo. Desafiante con Buey.',
-  'Mono':'Excelente con Rata y Drag\u00f3n. Desafiante con Tigre.',
-  'Gallo':'Excelente con Buey y Serpiente. Desafiante con Conejo.',
-  'Perro':'Excelente con Tigre y Caballo. Desafiante con Drag\u00f3n.',
-  'Cerdo':'Excelente con Conejo y Cabra. Desafiante con Serpiente.'
-};
-
-async function api(path, opts={}) {
-  const headers = {'Content-Type':'application/json'};
-  if (token) headers['Authorization'] = 'Bearer ' + token;
-  const r = await fetch(API + path, {...opts, headers});
-  if (!r.ok) { const err = await r.json().catch(()=>({detail:r.statusText})); throw new Error(err.detail||'Error'); }
+async function ap(p,o) {
+  const h = {'Content-Type':'application/json'};
+  if (tk) h['Authorization'] = 'Bearer '+tk;
+  const r = await fetch('/api'+p, {...o,headers:h});
+  if (!r.ok) { const e = await r.json().catch(()=>({detail:r.statusText})); throw new Error(e.detail||'Error'); }
   return r.json();
 }
 
-function showTab(tab) {
-  document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById('tab-'+tab).classList.add('active');
-  if (tab === 'signos') loadSignosGrid();
-  if (tab === 'cuenta' && token) fetchProfile();
+function st(t) {
+  document.querySelectorAll('.nv button').forEach(b => b.classList.toggle('a', b.dataset.tab === t));
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('a'));
+  document.getElementById(t).classList.add('a');
+  if (t==='ts') gs();
+  if (t==='tu' && tk) fp();
 }
-document.querySelectorAll('.nav button').forEach(b => b.addEventListener('click', ()=>showTab(b.dataset.tab)));
-function toggleAuth(l) { document.getElementById('registerForm').style.display=l?'none':'block'; document.getElementById('loginForm').style.display=l?'block':'none'; }
+document.querySelectorAll('.nv button').forEach(b => b.addEventListener('click', ()=>st(b.dataset.tab)));
 
-// Calc Sign 2 (home)
-async function calcSign2() {
-  const y=parseInt(document.getElementById('calcYear2').value), m=parseInt(document.getElementById('calcMonth2').value), d=parseInt(document.getElementById('calcDay2').value);
-  const el = document.getElementById('calcResult2');
-  try {
-    const r = await api('/api/calculate?year='+y+'&month='+m+'&day='+d);
-    el.innerHTML = `<div class="calc-res"><img src="${ANIMAL_IMGS[r.animal.id]}"><h3>${r.animal.name}</h3><p>${r.element} · ${r.animal.polarity}</p></div>`;
-  } catch(e) { el.innerHTML = '<p style="color:var(--red);font-size:0.75rem;margin-top:6px;">Error</p>'; }
-}
+function ta(l) { document.getElementById('rf').style.display=l?'none':'block'; document.getElementById('lf').style.display=l?'block':'none'; }
 
-// Animals Grid (Home)
-function renderGrid(container, clickHandler) {
-  const d = ANIMALS;
-  container.innerHTML = d.map((a,i) =>
-    `<div class="animal-card" onclick="${clickHandler}(${i})">
-      <img src="${ANIMAL_IMGS[i]}" alt="${ANIMALS[i]}" loading="lazy">
-      <div class="label">${ANIMALS[i]}<div class="sub"></div></div>
-    </div>`
+// Grid home
+function rg(c, h) {
+  c.innerHTML = A.map((a,i) =>
+    '<div class="ac" onclick="'+h+'('+i+')"><img src="'+AI[i]+'" alt="'+a+'" loading="lazy"><div class="lbl"><div class="n">'+a+'</div></div></div>'
   ).join('');
 }
-renderGrid(document.getElementById('animalGrid'), 'openModal');
-function loadSignosGrid() {
-  fetch('/api/animals').then(r=>r.json()).then(d=>{
-    document.getElementById('signosGrid').innerHTML = d.animals.map((a,i) =>
-      `<div class="animal-card" onclick="openModal(${i})">
-        <img src="${ANIMAL_IMGS[i]}" alt="${a.name}" loading="lazy">
-        <div class="label">${a.name}<div class="sub">${a.element} · ${a.polarity}</div></div>
-      </div>`
+rg(document.getElementById('ag'), 'om');
+
+// Grid signos
+function gs() {
+  ap('/animals').then(d => {
+    document.getElementById('sg').innerHTML = d.animals.map((a,i) =>
+      '<div class="ac" onclick="om('+i+')"><img src="'+AI[i]+'" alt="'+a.name+'" loading="lazy"><div class="lbl"><div class="n">'+a.name+'</div><div class="s">'+a.element+' &middot; '+a.polarity+'</div></div></div>'
     ).join('');
   }).catch(()=>{});
 }
 
 // Modal
-async function openModal(idx) {
-  const name = ANIMALS[idx];
-  const modal = document.getElementById('animalModal');
-  modal.classList.add('show');
-  document.getElementById('modalImg').src = ANIMAL_IMGS[idx];
-  document.getElementById('modalName').textContent = ANIMALS[idx];
-  document.getElementById('modalMeta').textContent = '';
-  document.getElementById('modalPersonality').textContent = 'Cargando...';
-  document.getElementById('modalElement').innerHTML = '';
-  document.getElementById('modalLucky').textContent = '';
-  document.getElementById('modalCompat').textContent = '';
-  document.getElementById('modalYears').innerHTML = YEARS[idx].slice(0,12).map(y => `<span class="y">${y}</span>`).join('');
+async function om(i) {
+  const m = document.getElementById('am');
+  m.classList.add('s');
+  document.getElementById('mi').src = AI[i];
+  document.getElementById('mn').textContent = A[i];
+  document.getElementById('mm').textContent = '';
+  document.getElementById('mp').textContent = 'Cargando...';
+  document.getElementById('me').innerHTML = '';
+  document.getElementById('ml').textContent = '';
+  document.getElementById('mc').textContent = '';
+  document.getElementById('my').innerHTML = YRS[i].slice(0,12).map(y => '<span class="y">'+y+'</span>').join('');
   try {
-    const d = await api('/api/animal/'+name);
-    document.getElementById('modalMeta').textContent = `${d.animal.element} · ${d.animal.polarity} · ${d.animal.branch} · ${d.animal.seasons}`;
-    document.getElementById('modalPersonality').textContent = d.personality;
-    document.getElementById('modalElement').innerHTML = d.animal.element+` · `+d.animal.polarity+` · `+d.animal.branch+` · `+d.animal.hours+` · `+d.animal.seasons;
-    document.getElementById('modalLucky').innerHTML = `Numeros: ${d.lucky?.numeros?.join(', ')}<br>Colores: ${d.lucky?.colores?.join(', ')}<br>Direccion: ${d.lucky?.direccion||'-'}<br>Piedras: ${STONES[name]?.join(', ')||'-'}`;
-    document.getElementById('modalCompat').textContent = COMPAT_BRIEF[name]||'';
-  } catch(e) { document.getElementById('modalPersonality').textContent = 'Informacion no disponible'; }
+    const d = await ap('/animal/'+A[i]);
+    document.getElementById('mm').textContent = d.animal.element+' \u00b7 '+d.animal.polarity+' \u00b7 '+d.animal.branch+' \u00b7 '+d.animal.seasons;
+    document.getElementById('mp').textContent = d.personality;
+    document.getElementById('me').innerHTML = '<span>'+d.animal.element+'</span><span> \u00b7 </span><span>'+d.animal.polarity+'</span><span> \u00b7 </span><span>'+d.animal.branch+'</span><span> \u00b7 </span><span>'+d.animal.hours+'</span>';
+    document.getElementById('ml').innerHTML = 'N\u00fameros: '+(d.lucky?.numeros?.join(', '))+'<br>Colores: '+(d.lucky?.colores?.join(', '))+'<br>Direcci\u00f3n: '+(d.lucky?.direccion||'-')+'<br>Piedras: '+(ST[A[i]]?.join(', ')||'-');
+    document.getElementById('mc').textContent = CB[A[i]]||'';
+  } catch(e) { document.getElementById('mp').textContent = 'Informaci\u00f3n no disponible'; }
 }
-function closeModal() { document.getElementById('animalModal').classList.remove('show'); }
-document.getElementById('animalModal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+function cm() { document.getElementById('am').classList.remove('s'); }
+document.getElementById('am').addEventListener('click', function(e) { if(e.target===this) cm(); });
+
+// Calc sign
+async function cs() {
+  const y=parseInt(document.getElementById('cy').value), m=parseInt(document.getElementById('cm').value), d=parseInt(document.getElementById('cd').value);
+  try {
+    const r = await ap('/calculate?year='+y+'&month='+m+'&day='+d);
+    document.getElementById('cr2').innerHTML = '<div class="cr2"><img src="'+AI[r.animal.id]+'"><h3>'+r.animal.name+'</h3><p>'+r.element+' \u00b7 '+r.animal.polarity+'</p></div>';
+  } catch(e) { document.getElementById('cr2').innerHTML = '<p style="color:var(--red);font-size:0.7rem;margin-top:6px;">Error</p>'; }
+}
 
 // Horoscope
-async function loadHoroscopes(period) {
-  currentPeriod = period;
-  document.querySelectorAll('.period-tabs button').forEach(b => b.classList.toggle('active', b.dataset.period===period));
-  const el = document.getElementById('horoList');
+async function lh(pr) {
+  cp = pr;
+  document.querySelectorAll('.pt button').forEach(b => b.classList.toggle('a', b.dataset.p===pr));
+  const el = document.getElementById('hl');
   try {
-    const d = await api('/api/animals');
+    const d = await ap('/animals');
     el.innerHTML = d.animals.map((a,i) =>
-      `<div class="horo-item" onclick="showHoro('${a.name}','${period}')">
-        <img src="${ANIMAL_IMGS[i]}" alt="${a.name}" loading="lazy">
-        <div class="info"><div class="name">${a.name}</div><div class="prev">Cargando...</div></div>
-        <div class="arr">></div>
-      </div>`
+      '<div class="hi" onclick="sh(\''+a.name+'\',\''+pr+'\')"><img src="'+AI[i]+'" loading="lazy"><div class="inf"><div class="n">'+a.name+'</div><div class="p">Cargando...</div></div><div class="ar">&gt;</div></div>'
     ).join('');
     d.animals.forEach(async (a,i) => {
       try {
-        const h = await api('/api/horoscope/'+a.name+'?period='+period);
-        const card = el.children[i];
-        if (card) card.querySelector('.prev').textContent = h.horoscope.slice(0,80)+'...';
+        const h = await ap('/horoscope/'+a.name+'?period='+pr);
+        const c = el.children[i];
+        if (c) c.querySelector('.p').textContent = h.horoscope.slice(0,80)+'...';
       } catch(e) {}
     });
   } catch(e) { el.innerHTML = '<p style="color:var(--text-dim);">Error</p>'; }
 }
-async function showHoro(name, period) {
+async function sh(n,pr) {
   try {
-    const h = await api('/api/horoscope/'+name+'?period='+period);
-    const idx = ANIMALS.indexOf(name);
-    const list = document.getElementById('horoList');
-    const old = list.querySelector('.horo-exp');
-    if (old) old.remove();
+    const h = await ap('/horoscope/'+n+'?period='+pr);
+    const i = A.indexOf(n);
+    const l = document.getElementById('hl');
+    const o = l.querySelector('.he');
+    if (o) o.remove();
     const d = document.createElement('div');
-    d.className = 'horo-exp';
-    d.innerHTML = `<div class="top"><img src="${ANIMAL_IMGS[idx]}"><div><div class="name">${h.animal}</div><div class="date">${h.date}</div></div></div><div class="text">${h.horoscope}</div><div class="lucky">Numeros: ${h.lucky?.numeros?.join(', ')} · Colores: ${h.lucky?.colores?.join(', ')}</div>`;
-    const card = list.children[idx];
-    if (card) card.after(d);
+    d.className = 'he';
+    d.innerHTML = '<div class="tp"><img src="'+AI[i]+'"><div><div class="nn">'+h.animal+'</div><div class="dd">'+h.date+'</div></div></div><div class="tx">'+h.horoscope+'</div><div class="lu">N\u00fameros: '+(h.lucky?.numeros?.join(', '))+' \u00b7 Colores: '+(h.lucky?.colores?.join(', '))+'</div>';
+    const c = l.children[i];
+    if (c) c.after(d);
     d.scrollIntoView({behavior:'smooth', block:'center'});
   } catch(e) {}
 }
 
-// Calc Sign
-async function calcSign() {
-  const y=parseInt(document.getElementById('calcYear').value), m=parseInt(document.getElementById('calcMonth').value), d=parseInt(document.getElementById('calcDay').value);
-  const el = document.getElementById('calcResult');
-  try {
-    const r = await api('/api/calculate?year='+y+'&month='+m+'&day='+d);
-    el.innerHTML = `<div class="calc-res"><img src="${ANIMAL_IMGS[r.animal.id]}"><h3>${r.animal.name}</h3><p>${r.element} · ${r.animal.polarity}</p></div>`;
-  } catch(e) { el.innerHTML = '<p style="color:var(--red);font-size:0.75rem;margin-top:6px;">Error</p>'; }
-}
-
 // Compat
-async function checkCompat() {
-  const a1=document.getElementById('comp1').value, a2=document.getElementById('comp2').value, el=document.getElementById('compResult');
-  if (!a1||!a2) { el.innerHTML='<p style="color:var(--text-dim);margin-top:6px;">Selecciona dos animales</p>'; return; }
+async function cc() {
+  const a1=document.getElementById('c1').value, a2=document.getElementById('c2').value, el=document.getElementById('cres');
+  if (!a1||!a2) { el.innerHTML='<p style="color:var(--text-dim);margin-top:6px;">Seleccion\u00e1 dos animales</p>'; return; }
   try {
-    const r = await api('/api/compatibility?animal1='+a1+'&animal2='+a2);
+    const r = await ap('/compatibility?animal1='+a1+'&animal2='+a2);
     const c=r.compatibility;
     const cs={Excelente:'var(--gold)',Buena:'#4caf50',Neutral:'#ff9800',Desafiante:'#e91e63',Conflicto:'var(--red)'};
-    const i1=ANIMALS.indexOf(r.animal1.name), i2=ANIMALS.indexOf(r.animal2.name);
-    el.innerHTML = `<div class="comp-disp"><div class="pair"><img src="${ANIMAL_IMGS[i1]}"><span class="name">${r.animal1.name}</span><span class="heart">&#9829;</span><span class="name">${r.animal2.name}</span><img src="${ANIMAL_IMGS[i2]}"></div><div class="comp-bar"><div class="comp-bar-fill" style="width:${c.score}%;background:${cs[c.level]||'#888'};"></div></div><div class="comp-level" style="color:${cs[c.level]||'#888'};">${c.level} (${c.score}%)</div><div class="comp-desc">${c.desc}</div></div>`;
+    const i1=A.indexOf(r.animal1.name), i2=A.indexOf(r.animal2.name);
+    el.innerHTML = '<div class="cd"><div class="pr"><img src="'+AI[i1]+'"><span class="nn">'+r.animal1.name+'</span><span class="hrt">&hearts;</span><span class="nn">'+r.animal2.name+'</span><img src="'+AI[i2]+'"></div><div class="cb"><div class="cbf" style="width:'+c.score+'%;background:'+(cs[c.level]||'#888')+';"></div></div><div class="lv" style="color:'+(cs[c.level]||'#888')+';">'+c.level+' ('+c.score+'%)</div><div class="ds">'+c.desc+'</div></div>';
   } catch(e) { el.innerHTML = '<p style="color:var(--red);">Error</p>'; }
 }
 
 // Auth
-async function register() {
-  const e=document.getElementById('regEmail').value, p=document.getElementById('regPass').value, n=document.getElementById('regName').value;
-  const y=parseInt(document.getElementById('regYear').value), m=parseInt(document.getElementById('regMonth').value), d=parseInt(document.getElementById('regDay').value);
-  const msg=document.getElementById('regMsg');
-  if (!e||!p||!n) { msg.textContent='Completa todos los campos'; msg.className='auth-msg error'; return; }
+async function reg() {
+  const e=document.getElementById('re').value, p=document.getElementById('rp').value, n=document.getElementById('rn').value;
+  const y=parseInt(document.getElementById('ry').value), m=parseInt(document.getElementById('rm').value), d=parseInt(document.getElementById('rd').value);
+  const msg=document.getElementById('rmsg');
+  if (!e||!p||!n) { msg.textContent='Complet\u00e1 todos los campos'; msg.className='msg e'; return; }
   try {
-    const r = await api('/api/register', {method:'POST', body:JSON.stringify({email:e,password:p,nombre:n,birth_year:y,birth_month:m,birth_day:d})});
-    token=r.token; localStorage.setItem('token',token);
-    msg.innerHTML='Registrado! Tu animal es '+r.animal; msg.className='auth-msg success';
-    setTimeout(fetchProfile,1200);
-  } catch(e) { msg.textContent=e.message; msg.className='auth-msg error'; }
+    const r = await ap('/register', {method:'POST', body:JSON.stringify({email:e,password:p,nombre:n,birth_year:y,birth_month:m,birth_day:d})});
+    tk=r.token; localStorage.setItem('token',tk);
+    msg.innerHTML='Registrado! Tu animal es '+r.animal; msg.className='msg s';
+    setTimeout(fp,1200);
+  } catch(e) { msg.textContent=e.message; msg.className='msg e'; }
 }
-async function login() {
-  const e=document.getElementById('loginEmail').value, p=document.getElementById('loginPass').value, msg=document.getElementById('loginMsg');
-  if (!e||!p) { msg.textContent='Completa los campos'; msg.className='auth-msg error'; return; }
+async function lin() {
+  const e=document.getElementById('le').value, p=document.getElementById('lp').value, msg=document.getElementById('lmsg');
+  if (!e||!p) { msg.textContent='Complet\u00e1 los campos'; msg.className='msg e'; return; }
   try {
-    const r = await api('/api/login', {method:'POST', body:JSON.stringify({email:e,password:p,nombre:'',birth_year:2000})});
-    token=r.token; localStorage.setItem('token',token);
-    msg.innerHTML='Bienvenido!'; msg.className='auth-msg success';
-    setTimeout(fetchProfile,1000);
-  } catch(e) { msg.textContent=e.message; msg.className='auth-msg error'; }
+    const r = await ap('/login', {method:'POST', body:JSON.stringify({email:e,password:p,nombre:'',birth_year:2000})});
+    tk=r.token; localStorage.setItem('token',tk);
+    msg.innerHTML='Bienvenido!'; msg.className='msg s';
+    setTimeout(fp,1000);
+  } catch(e) { msg.textContent=e.message; msg.className='msg e'; }
 }
-async function fetchProfile() {
-  if (!token) return;
+async function fp() {
+  if (!tk) return;
   try {
-    const d = await api('/api/profile');
-    document.getElementById('authSection').style.display='none';
-    document.getElementById('profileSection').style.display='block';
-    const idx = ANIMALS.indexOf(d.user.animal.toLowerCase());
-    document.getElementById('profImg').src = idx>=0?ANIMAL_IMGS[idx]:ANIMAL_IMGS[4];
-    document.getElementById('profName').textContent = d.user.nombre||d.user.email;
-    document.getElementById('profSub').textContent = (d.user.signo||d.user.animal)+' · Anho '+d.user.birth_year;
+    const d = await ap('/profile');
+    document.getElementById('as').style.display='none';
+    document.getElementById('ps').style.display='block';
+    const i = A.indexOf(d.user.animal);
+    document.getElementById('pi').src = i>=0?AI[i]:AI[4];
+    document.getElementById('pn2').textContent = d.user.nombre||d.user.email;
+    document.getElementById('ps2').textContent = (d.user.signo||d.user.animal)+' \u00b7 A\u00f1o '+d.user.birth_year;
     if (d.user.premium) {
-      document.getElementById('profPremium').innerHTML='<span class="profile-badge">PREMIUM</span>';
-      document.getElementById('premiumSection').innerHTML='';
+      document.getElementById('pp').innerHTML='<span class="pb">PREMIUM</span>';
+      document.getElementById('prs').innerHTML='';
     } else {
-      document.getElementById('profPremium').innerHTML='<span style="font-size:0.72rem;color:var(--text-dim);">Gratuito</span>';
-      document.getElementById('premiumSection').innerHTML='<button class="btn btn-sm btn-gold" onclick="alert(\'Proximamente\')" style="margin-top:6px;">Premium $2/mes</button>';
+      document.getElementById('pp').innerHTML='<span style="font-size:0.68rem;color:var(--text-dim);">Gratuito</span>';
+      document.getElementById('prs').innerHTML='<button class="btn btn-sm" onclick="alert(\'Pr\u00f3ximamente\')" style="margin-top:4px;">Premium $2/mes</button>';
     }
-  } catch(e) { logout(); }
+  } catch(e) { lo(); }
 }
-function logout() { token=null; localStorage.removeItem('token'); document.getElementById('authSection').style.display='block'; document.getElementById('profileSection').style.display='none'; }
+function lo() { tk=null; localStorage.removeItem('token'); document.getElementById('as').style.display='block'; document.getElementById('ps').style.display='none'; }
 
 // Init
 (function() {
-  const days = Array.from({length:31},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join('');
-  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'].map((m,i)=>'<option value="'+(i+1)+'">'+m+'</option>').join('');
-  const years = Array.from({length:100},(_,i)=>'<option value="'+(2026-i)+'">'+(2026-i)+'</option>').join('');
-  ['calcDay','calcDay2','regDay'].forEach(id => document.getElementById(id).innerHTML = days);
-  ['calcMonth','calcMonth2','regMonth'].forEach(id => document.getElementById(id).innerHTML = months);
-  ['calcYear','calcYear2','regYear'].forEach(id => document.getElementById(id).innerHTML = years);
-  ['comp1','comp2'].forEach(id => {
-    document.getElementById(id).innerHTML = '<option value="">Elegi</option>'+ANIMALS.map((a,i)=>'<option value="'+a+'">'+ANIMALS[i]+'</option>').join('');
+  const ds = Array.from({length:31},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join('');
+  const ms = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'].map((m,i)=>'<option value="'+(i+1)+'">'+m+'</option>').join('');
+  const ys = Array.from({length:100},(_,i)=>'<option value="'+(2026-i)+'">'+(2026-i)+'</option>').join('');
+  ['cd','rd'].forEach(id => document.getElementById(id).innerHTML = ds);
+  ['cm','rm'].forEach(id => document.getElementById(id).innerHTML = ms);
+  ['cy','ry'].forEach(id => document.getElementById(id).innerHTML = ys);
+  ['c1','c2'].forEach(id => {
+    document.getElementById(id).innerHTML = '<option value="">Eleg\u00ed</option>'+A.map((a,i)=>'<option value="'+a+'">'+a+'</option>').join('');
   });
-  document.getElementById('periodNav').innerHTML =
-    [{k:'today',l:'Hoy'},{k:'tomorrow',l:'Ma\u00f1ana'},{k:'weekly',l:'Semanal'},{k:'monthly',l:'Mensual'},{k:'yearly',l:'Anual'}]
-    .map(p => '<button data-period="'+p.k+'" class="'+(p.k==='today'?'active':'')+'" onclick="loadHoroscopes(\''+p.k+'\')">'+p.l+'</button>').join('');
-  loadHoroscopes('today');
-  if (token) fetchProfile();
+  document.getElementById('pn').innerHTML = [{k:'today',l:'Hoy'},{k:'tomorrow',l:'Ma\u00f1ana'},{k:'weekly',l:'Semanal'},{k:'monthly',l:'Mensual'},{k:'yearly',l:'Anual'}].map(p => '<button data-p="'+p.k+'" class="'+(p.k==='today'?'a':'')+'" onclick="lh(\''+p.k+'\')">'+p.l+'</button>').join('');
+  lh('today');
+  if (tk) fp();
 })();
 </script>
 </body>
