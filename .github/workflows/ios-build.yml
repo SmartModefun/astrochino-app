@@ -1,0 +1,260 @@
+name: Build & Upload iOS IPA
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'main.py'
+      - 'render.yaml'
+      - '.env'
+      - 'requirements.txt'
+      - 'Dockerfile'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '22'
+  SCHEME: 'AstroChino'
+  BUNDLE_ID: 'com.astrochino.app'
+  APP_STORE_CONNECT_TEAM_ID: ${{ secrets.APP_STORE_CONNECT_TEAM_ID }}
+  BUILD_NUMBER: ${{ github.run_number }}
+
+jobs:
+  build:
+    name: Build and Upload IPA
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select latest Xcode
+        run: |
+          LATEST=$(ls -1d /Applications/Xcode_*.app /Applications/Xcode.app 2>/dev/null | sort -V | tail -1)
+          if [ -n "$LATEST" ]; then
+            sudo xcode-select -s "$LATEST"
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Sync Capacitor (copy web assets + SPM dependencies)
+        run: |
+          npx cap sync ios
+
+      - name: Patch Info.plist with app-specific keys
+        run: |
+          PLIST="ios/App/App/Info.plist"
+          /usr/libexec/PlistBuddy -c "Add ITSAppUsesNonExemptEncryption bool false" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set ITSAppUsesNonExemptEncryption false" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add NSAppTransportSecurity dict" "$PLIST" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Add NSAppTransportSecurity:NSAllowsArbitraryLoadsInWebContent bool true" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set NSAppTransportSecurity:NSAllowsArbitraryLoadsInWebContent true" "$PLIST"
+
+      - name: Generate PreInitICU.m
+        run: |
+          cat > ios/App/App/PreInitICU.m << 'OBJC'
+          #import <UIKit/UIKit.h>
+          #import <objc/message.h>
+          #import <objc/runtime.h>
+
+          static id _safe_TUI_initWithFrame(id self, SEL _cmd, CGRect frame) {
+              Class tuiClass = objc_getClass("TUIPredictionView");
+              if (!tuiClass) return nil;
+              Class superClass = class_getSuperclass(tuiClass);
+              if (!superClass) return nil;
+              struct objc_super sup = { self, superClass };
+              return ((id(*)(struct objc_super*, SEL, CGRect))objc_msgSendSuper)(&sup, _cmd, frame);
+          }
+
+          static void _kb_noop_init(__unused Class self, __unused SEL _cmd) {}
+
+          static void _kb_suppress_exception_raise(id self, SEL _cmd) {
+              NSException *exc = (NSException *)self;
+              NSLog(@"[KBFix] Suppressed NSException: %@ reason:%@", exc.name, exc.reason);
+          }
+
+          static void _kb_uncaught_handler(NSException *exception) {
+              NSLog(@"[KBFix] Uncaught exception: %@\n%@", exception, exception.callStackSymbols);
+          }
+
+          __attribute__((constructor)) static void _kb_fix_construct() {
+              @autoreleasepool {
+                  const char *crashy[] = { "FBSSceneExtension", "GCDeviceSessionConfiguration" };
+                  for (size_t i = 0; i < sizeof(crashy)/sizeof(crashy[0]); i++) {
+                      Class cls = objc_getClass(crashy[i]);
+                      if (!cls) continue;
+                      Class meta = object_getClass(cls);
+                      if (!meta) continue;
+                      class_replaceMethod(meta, @selector(initialize), (IMP)_kb_noop_init, "v@:");
+                  }
+                  Class tui = objc_getClass("TUIPredictionView");
+                  if (tui) {
+                      class_replaceMethod(tui, @selector(initWithFrame:), (IMP)_safe_TUI_initWithFrame,
+                          "@@:{CGRect={CGPoint=dd}{CGSize=dd}}");
+                  }
+                  Method raiseM = class_getInstanceMethod([NSException class], @selector(raise));
+                  if (raiseM) method_setImplementation(raiseM, (IMP)_kb_suppress_exception_raise);
+                  NSSetUncaughtExceptionHandler(_kb_uncaught_handler);
+              }
+          }
+
+          @interface KBFix : NSObject @end
+          @implementation KBFix
+          + (void)install {
+              Class tui = objc_getClass("TUIPredictionView");
+              if (tui) {
+                  Method m = class_getInstanceMethod(tui, @selector(initWithFrame:));
+                  if (m && method_getImplementation(m) != (IMP)_safe_TUI_initWithFrame) {
+                      method_setImplementation(m, (IMP)_safe_TUI_initWithFrame);
+                  }
+              }
+          }
+          @end
+          OBJC
+
+      - name: Copy icons to iOS project
+        run: |
+          RESOURCES="resources/ios"
+          APPSET="ios/App/App/Assets.xcassets/AppIcon.appiconset"
+          mkdir -p "$APPSET"
+          cp "$RESOURCES"/*.png "$APPSET/"
+          cat > "$APPSET/Contents.json" << 'EOF'
+          {
+            "images": [
+              {"idiom":"iphone","size":"20x20","filename":"icon-20@2x.png","scale":"2x"},
+              {"idiom":"iphone","size":"20x20","filename":"icon-20@3x.png","scale":"3x"},
+              {"idiom":"iphone","size":"29x29","filename":"icon-29@2x.png","scale":"2x"},
+              {"idiom":"iphone","size":"29x29","filename":"icon-29@3x.png","scale":"3x"},
+              {"idiom":"iphone","size":"40x40","filename":"icon-40@2x.png","scale":"2x"},
+              {"idiom":"iphone","size":"40x40","filename":"icon-40@3x.png","scale":"3x"},
+              {"idiom":"iphone","size":"60x60","filename":"icon-60@2x.png","scale":"2x"},
+              {"idiom":"iphone","size":"60x60","filename":"icon-60@3x.png","scale":"3x"},
+              {"idiom":"ipad","size":"20x20","filename":"icon-20@2x.png","scale":"2x"},
+              {"idiom":"ipad","size":"20x20","filename":"icon-20@3x.png","scale":"3x"},
+              {"idiom":"ipad","size":"29x29","filename":"icon-29@2x.png","scale":"2x"},
+              {"idiom":"ipad","size":"29x29","filename":"icon-29@3x.png","scale":"3x"},
+              {"idiom":"ipad","size":"40x40","filename":"icon-40@2x.png","scale":"2x"},
+              {"idiom":"ipad","size":"40x40","filename":"icon-40@3x.png","scale":"3x"},
+              {"idiom":"ipad","size":"76x76","filename":"icon-76.png","scale":"1x"},
+              {"idiom":"ipad","size":"76x76","filename":"icon-76@2x.png","scale":"2x"},
+              {"idiom":"ipad","size":"83.5x83.5","filename":"icon-83.5@2x.png","scale":"2x"},
+              {"idiom":"ios-marketing","size":"1024x1024","filename":"icon-1024.png","scale":"1x"}
+            ],
+            "info": {"author":"xcode","version":1}
+          }
+          EOF
+
+      - name: Setup Code Signing
+        env:
+          CERT_BASE64: ${{ secrets.IOS_CERT_BASE64 }}
+          KEY_BASE64: ${{ secrets.IOS_KEY_BASE64 }}
+          P12_PASSWORD: test1234
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+        run: |
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings -t 3600 -l ~/Library/Keychains/build.keychain
+
+          echo "$CERT_BASE64" | base64 -d > distribution.cer
+          echo "$KEY_BASE64" | base64 -d > distribution.key
+
+          openssl x509 -in distribution.cer -inform DER -out cert.pem -outform PEM
+          openssl pkcs12 -export -in cert.pem -inkey distribution.key -out cert.p12 -password pass:"$P12_PASSWORD"
+          rm distribution.cer distribution.key cert.pem
+
+          security import cert.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
+          rm cert.p12
+
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+
+          IDENTITY=$(security find-identity -v -p codesigning 2>/dev/null | \
+            grep "Apple Distribution" | head -1 | sed 's/.*"\(.*\)".*/\1/')
+
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$BUILD_PROVISION_PROFILE_BASE64" | base64 -d > profile.mobileprovision
+          PROFILE_DATA=$(security cms -D -i profile.mobileprovision 2>/dev/null)
+          UUID=$(echo "$PROFILE_DATA" | awk -F'[<>]' '/<key>UUID<\/key>/ {getline; print $3}')
+          SPECIFIER=$(echo "$PROFILE_DATA" | awk -F'[<>]' '/<key>Name<\/key>/ {getline; print $3}')
+          cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
+          rm profile.mobileprovision
+
+          echo "SIGNING_IDENTITY=$IDENTITY" >> $GITHUB_ENV
+          echo "PROFILE_SPECIFIER=$SPECIFIER" >> $GITHUB_ENV
+          echo "PROFILE_UUID=$UUID" >> $GITHUB_ENV
+          export SIGNING_IDENTITY="$IDENTITY"
+          export PROFILE_SPECIFIER="$SPECIFIER"
+
+          export BUILD_NUMBER="${{ env.BUILD_NUMBER }}"
+          python3 scripts/patch_pbxproj.py
+
+      - name: Build iOS Archive
+        run: |
+          SCHEME_NAME=$(xcodebuild -list -project ios/App/App.xcodeproj 2>/dev/null | \
+            grep -A1 "Schemes:" | tail -1 | xargs)
+          xcodebuild archive \
+            -project "ios/App/App.xcodeproj" \
+            -scheme "$SCHEME_NAME" \
+            -configuration Release \
+            -archivePath build/App.xcarchive \
+            DEVELOPMENT_TEAM="${{ secrets.IOS_TEAM_ID }}"
+
+      - name: Export IPA
+        run: |
+          cat > exportOptions.plist << XCEOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store-connect</string>
+              <key>teamID</key>
+              <string>${{ secrets.IOS_TEAM_ID }}</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>${{ env.BUNDLE_ID }}</key>
+                  <string>$PROFILE_SPECIFIER</string>
+              </dict>
+              <key>uploadSymbols</key>
+              <true/>
+          </dict>
+          </plist>
+          XCEOF
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportPath build/ \
+            -exportOptionsPlist exportOptions.plist
+
+      - name: Upload IPA to App Store Connect
+        env:
+          API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          API_KEY_B64: ${{ secrets.APP_STORE_CONNECT_API_KEY_B64 }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$API_KEY_B64" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_$API_KEY_ID.p8
+          IPA=$(ls build/*.ipa 2>/dev/null | head -1)
+          if [ -z "$IPA" ]; then exit 1; fi
+          xcrun altool --upload-app \
+            -f "$IPA" \
+            --apiKey "$API_KEY_ID" \
+            --apiIssuer "$API_ISSUER_ID" \
+            --type ios
+
+      - name: Upload IPA as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AstroChino.ipa
+          path: build/App.ipa
+          if-no-files-found: warn

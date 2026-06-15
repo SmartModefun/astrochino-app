@@ -2,3 +2,11 @@ __pycache__/
 *.pyc
 *.db
 .env
+node_modules/
+android/app/build/
+android/.gradle/
+android/build/
+ios/App/build/
+ios/App/Pods/
+ios/App/App.xcworkspace/
+*.keystore

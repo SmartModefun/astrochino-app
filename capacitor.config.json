@@ -1,0 +1,16 @@
+{
+  "appId": "com.astrochino.app",
+  "appName": "AstroChino",
+  "webDir": "static",
+  "server": {
+    "url": "https://astrochino.onrender.com",
+    "hostname": "app.astrochino"
+  },
+  "ios": {
+    "scheme": "AstroChino",
+    "contentInset": "always"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
