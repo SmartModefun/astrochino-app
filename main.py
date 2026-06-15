@@ -170,6 +170,13 @@ async def index():
         return FileResponse("static/index.html")
     return {"status": "ok", "app": "AstroChino"}
 
+@app.get("/static/images/{filename}")
+async def serve_image(filename: str):
+    path = os.path.join("static/images", filename)
+    if os.path.exists(path):
+        return FileResponse(path)
+    raise HTTPException(404)
+
 @app.get("/api/health")
 async def health():
     return {"status": "ok", "llm_set": bool(LLM_API_KEY)}
