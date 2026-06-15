@@ -5,266 +5,503 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AstroChino — Horóscopo Chino</title>
 <style>
+@font-face {
+  font-family: 'Kunaroh';
+  src: url('/static/fonts/Kunaroh.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;700&display=swap');
+
 * { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #0a0604;
+  --bg2: #120a08;
+  --card: #1a0f0c;
+  --card-hover: #221512;
+  --red: #b22222;
+  --red-dark: #6b1010;
+  --red-light: #d43838;
+  --gold: #d4a017;
+  --gold-light: #f0c850;
+  --gold-dark: #a67c00;
+  --text: #f0e6d3;
+  --text-dim: #8a7a6a;
+  --border: rgba(212,160,23,0.15);
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #f5f0eb;
-  color: #2d2a24;
+  font-family: 'Noto Sans SC', 'Noto Serif SC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Chinese Lattice Background ── */
+body::before {
+  content:''; position:fixed; top:0; left:0; right:0; bottom:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(212,160,23,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212,160,23,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+body::after {
+  content:''; position:fixed; top:0; left:0; right:0; bottom:0; z-index:0; pointer-events:none;
+  background: radial-gradient(ellipse at 20% 50%, rgba(180,30,30,0.06) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 50%, rgba(180,30,30,0.04) 0%, transparent 60%);
 }
 
 /* ── Header ── */
 .header {
-  background: linear-gradient(135deg, #1a0f0c, #2d1814);
-  color: #f0e6d3;
-  text-align: center;
-  padding: 28px 16px 20px;
-  position: relative;
+  text-align:center; padding:36px 16px 20px;
+  position:relative; z-index:1;
+  background: linear-gradient(180deg, #0d0806 0%, transparent 100%);
 }
-.header h1 { font-size:1.6rem; letter-spacing:6px; }
-.header h1 .gold { color:#d4a017; }
-.header h1 .red { color:#c62828; }
-.header .sub { font-size:0.7rem; color:#a09080; letter-spacing:3px; margin-top:4px; }
+.header h1 {
+  font-family: 'Kunaroh', 'Noto Serif SC', serif;
+  font-size: 2.8rem;
+  font-weight: normal;
+  letter-spacing: 8px;
+  background: linear-gradient(180deg, #f0c850 0%, #d4a017 40%, #a67c00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(212,160,23,0.3));
+  animation: shimmer 3s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(212,160,23,0.3)); }
+  50% { filter: drop-shadow(0 0 35px rgba(212,160,23,0.5)); }
+}
+.header .cn {
+  font-size: 0.75rem; color: var(--text-dim);
+  letter-spacing: 6px; margin-top: 4px;
+  -webkit-text-fill-color: var(--text-dim);
+}
+.header .cn::before, .header .cn::after {
+  content: ' ◇ '; color: var(--gold); opacity:0.4;
+}
 
-/* ── Nav Tabs ── */
-.nav-tabs {
-  display:flex; background:#fff; border-bottom:1px solid #e0d5c8;
-  position:sticky; top:0; z-index:50;
+/* ── Year Banner ── */
+.year-banner {
+  position:relative; z-index:1;
+  text-align:center; padding:18px 16px; margin: 0 12px 12px;
+  background: linear-gradient(135deg, rgba(180,30,30,0.12), rgba(212,160,23,0.06));
+  border: 1px solid var(--border);
 }
-.nav-tabs button {
-  flex:1; padding:14px 8px; border:none; background:none;
-  font-size:0.8rem; font-weight:600; color:#8a7a6a; cursor:pointer;
-  letter-spacing:0.5px; transition:0.2s;
-  border-bottom:2px solid transparent;
-}
-.nav-tabs button.active { color:#c62828; border-bottom-color:#c62828; }
-.nav-tabs button:hover { color:#c62828; }
+.year-banner .label { font-size:0.6rem; color:var(--text-dim); letter-spacing:3px; text-transform:uppercase; }
+.year-banner .animal { font-size:1.5rem; font-weight:700; color:var(--gold); margin:4px 0; letter-spacing:2px; }
+.year-banner .sub { font-size:0.75rem; color:var(--text-dim); }
+.year-banner .desc { font-size:0.8rem; color:var(--text); line-height:1.6; margin-top:8px; max-width:600px; margin-left:auto; margin-right:auto; }
 
 /* ── Container ── */
-.container { max-width:720px; margin:0 auto; padding:16px; padding-bottom:100px; }
-
-/* ── Section ── */
-.section { display:none; }
-.section.active { display:block; }
+.container { max-width:680px; margin:0 auto; padding:0 12px 120px; position:relative; z-index:1; }
 
 /* ── Card ── */
 .card {
-  background:#fff; border-radius:6px; padding:20px; margin-bottom:14px;
-  box-shadow:0 1px 3px rgba(0,0,0,0.06); border:1px solid #e8ddd2;
+  background: linear-gradient(145deg, var(--card), #140b08);
+  border: 1px solid var(--border);
+  border-radius: 4px; padding: 20px; margin-bottom: 14px;
+  position: relative;
+}
+.card::before {
+  content:''; position:absolute; top:-1px; left:15%; right:15%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0.5;
 }
 .card-title {
-  font-size:1.1rem; font-weight:700; color:#c62828;
-  margin-bottom:14px; letter-spacing:0.5px;
+  font-family: 'Noto Serif SC', serif;
+  font-size:1.1rem; font-weight:700; color:var(--gold-light);
+  margin-bottom:14px; letter-spacing:2px;
 }
-.card-title .icon { margin-right:6px; }
 
 /* ── Inputs ── */
-.row { display:flex; gap:8px; }
 select, input {
-  flex:1; padding:10px; border:1px solid #d5c8b8; border-radius:4px;
-  background:#faf8f5; font-size:0.85rem; color:#2d2a24;
+  padding:10px 12px; border:1px solid var(--border);
+  background: rgba(0,0,0,0.3); color:var(--text);
+  font-family:'Noto Sans SC', sans-serif; font-size:0.82rem;
+  border-radius:2px;
 }
-select { margin:4px 0; }
+select { cursor:pointer; }
+select:focus, input:focus { outline:none; border-color:var(--gold); }
 
-/* ── Buttons ── */
+/* ── Button ── */
 .btn {
-  display:inline-block; padding:11px 32px; border:none; border-radius:4px;
-  background:linear-gradient(135deg,#c62828,#8e1a1a); color:#fff;
-  font-size:0.85rem; font-weight:600; cursor:pointer; letter-spacing:0.5px;
-  transition:0.2s;
+  display:inline-block; padding:11px 28px; border:none; cursor:pointer;
+  font-family:'Noto Sans SC', sans-serif; font-size:0.8rem; font-weight:700;
+  letter-spacing:1px; border-radius:2px;
+  background: linear-gradient(180deg, var(--red), var(--red-dark));
+  color: var(--gold-light);
+  position:relative; transition:0.2s;
 }
-.btn:hover { transform:translateY(-1px); box-shadow:0 2px 8px rgba(198,40,40,0.3); }
+.btn:hover { filter:brightness(1.15); }
 .btn-full { width:100%; margin-top:8px; }
-.btn-sm { padding:8px 20px; font-size:0.8rem; }
+.btn-sm { padding:8px 20px; font-size:0.75rem; }
+.btn-outline { background:transparent; border:1px solid var(--gold); color:var(--gold); }
+.btn-outline:hover { background:rgba(212,160,23,0.1); }
+.btn-gold {
+  background: linear-gradient(180deg, var(--gold), var(--gold-dark));
+  color: var(--bg); font-weight:700;
+}
+.btn-gold:hover { filter:brightness(1.1); }
 
-/* ── Animal Card ── */
+/* ── Ornamental Divider ── */
+.divider { text-align:center; margin:20px 0; }
+.divider span { color:var(--gold); opacity:0.3; font-size:0.8rem; letter-spacing:8px; }
+
+/* ── About Section ── */
+.about-text { font-size:0.85rem; line-height:1.8; color:var(--text); opacity:0.9; }
+.about-text p { margin-bottom:10px; }
+.about-text .highlight { color:var(--gold); font-weight:700; }
+
+/* ── Calc Row ── */
+.calc-row { display:flex; gap:6px; margin:6px 0; }
+.calc-row select { flex:1; min-width:0; }
+
+/* ── Animal Grid ── */
+.animal-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+}
 .animal-card {
-  display:flex; align-items:center; gap:14px; padding:14px;
-  background:#fcfaf7; border-radius:6px; margin-bottom:10px;
-  cursor:pointer; transition:0.2s; border:1px solid #ebe3d8;
+  text-align:center; cursor:pointer;
+  border:1px solid var(--border); background:var(--card);
+  padding:14px 8px; transition:0.25s;
+  position:relative; overflow:hidden;
 }
-.animal-card:hover { border-color:#c62828; background:#fdf8f4; }
-.animal-card img { width:52px; height:52px; border-radius:50%; object-fit:cover; flex-shrink:0; }
-.animal-card .info { flex:1; min-width:0; }
-.animal-card .info .name { font-weight:700; color:#2d2a24; font-size:0.95rem; }
-.animal-card .info .preview { font-size:0.8rem; color:#8a7a6a; margin-top:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.animal-card .info .tag { display:inline-block; font-size:0.65rem; color:#c62828; margin-top:4px; font-weight:600; }
-.animal-card .arrow { color:#c62828; font-size:1.2rem; }
+.animal-card:hover {
+  border-color:var(--gold); background:var(--card-hover);
+  transform:translateY(-2px);
+}
+.animal-card .img-wrap {
+  width:100px; height:100px; margin:0 auto 8px;
+  border-radius:50%; overflow:hidden;
+  border:2px solid rgba(212,160,23,0.15);
+  transition:0.25s;
+}
+.animal-card:hover .img-wrap { border-color:var(--gold); }
+.animal-card .img-wrap img {
+  width:100%; height:100%; object-fit:cover;
+}
+.animal-card .name { font-size:0.9rem; font-weight:700; color:var(--gold); letter-spacing:1px; }
+.animal-card .sub { font-size:0.65rem; color:var(--text-dim); margin-top:2px; }
+.animal-card::after {
+  content:''; position:absolute; bottom:0; left:10%; right:10%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0.2;
+}
 
-/* ── Animal Grid Page ── */
-.animal-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
-.animal-grid .item {
-  background:#fcfaf7; border-radius:6px; padding:14px; text-align:center; cursor:pointer;
-  border:1px solid #ebe3d8; transition:0.2s;
+/* ── Animal Detail Modal ── */
+.modal-overlay {
+  display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:100;
+  background:rgba(0,0,0,0.7); backdrop-filter:blur(2px);
 }
-.animal-grid .item:hover { border-color:#c62828; }
-.animal-grid .item img { width:48px; height:48px; object-fit:cover; border-radius:50%; margin-bottom:6px; }
-.animal-grid .item .name { font-weight:700; font-size:0.85rem; color:#2d2a24; }
-.animal-grid .item .sub { font-size:0.7rem; color:#8a7a6a; margin-top:2px; }
+.modal-overlay.show { display:flex; align-items:center; justify-content:center; }
+.modal {
+  background: var(--card); border:1px solid var(--gold);
+  max-width:480px; width:90%; max-height:90vh; overflow-y:auto;
+  position:relative; animation: modalIn 0.3s ease;
+}
+@keyframes modalIn {
+  from { opacity:0; transform:translateY(20px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.modal-close {
+  position:absolute; top:10px; right:14px;
+  background:none; border:none; color:var(--text-dim);
+  font-size:1.5rem; cursor:pointer; z-index:2;
+  font-family:'Noto Sans SC', sans-serif;
+}
+.modal-close:hover { color:var(--gold); }
+.modal-top {
+  text-align:center; padding:30px 20px 16px;
+  background: linear-gradient(180deg, rgba(180,30,30,0.1), transparent);
+}
+.modal-top img {
+  width:120px; height:120px; object-fit:cover; border-radius:50%;
+  border:3px solid var(--gold); margin-bottom:10px;
+  box-shadow:0 0 30px rgba(212,160,23,0.15);
+}
+.modal-top h2 { font-size:1.6rem; color:var(--gold); letter-spacing:2px; font-family:'Noto Serif SC',serif; }
+.modal-top .meta { font-size:0.75rem; color:var(--text-dim); margin-top:4px; }
+.modal-body { padding:16px 20px 20px; }
+.modal-section { margin-bottom:14px; }
+.modal-section h3 {
+  font-size:0.8rem; color:var(--gold); text-transform:uppercase;
+  letter-spacing:2px; margin-bottom:6px; font-weight:400;
+  border-bottom:1px solid var(--border); padding-bottom:4px;
+}
+.modal-section p, .modal-section li {
+  font-size:0.85rem; line-height:1.7; color:var(--text);
+}
+.modal-section .tag {
+  display:inline-block; padding:2px 10px; margin:2px;
+  background:rgba(212,160,23,0.1); color:var(--gold-light);
+  font-size:0.75rem; border-radius:2px; border:1px solid rgba(212,160,23,0.2);
+}
+.modal-years {
+  display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;
+}
+.modal-years .year {
+  padding:2px 10px; background:rgba(0,0,0,0.3);
+  border:1px solid var(--border); font-size:0.75rem; color:var(--text);
+  border-radius:2px;
+}
 
-/* ── Detail ── */
-#animalDetail {
-  background:#fff; border-radius:6px; padding:20px; margin-bottom:14px;
-  border:1px solid #e8ddd2; display:none;
+/* ── Horoscope List ── */
+.horo-item {
+  display:flex; align-items:center; gap:12px; padding:12px;
+  border:1px solid var(--border); margin-bottom:8px;
+  cursor:pointer; transition:0.2s; background:var(--card);
 }
-#animalDetail .top { display:flex; align-items:center; gap:16px; margin-bottom:14px; }
-#animalDetail img { width:72px; height:72px; object-fit:cover; border-radius:50%; }
-#animalDetail h2 { font-size:1.3rem; color:#2d2a24; }
-#animalDetail .meta { font-size:0.8rem; color:#8a7a6a; margin-top:2px; }
-#animalDetail .desc { font-size:0.85rem; line-height:1.7; color:#3d3832; margin:10px 0; }
-#animalDetail .lucky { font-size:0.8rem; color:#8a7a6a; margin-top:10px; padding-top:10px; border-top:1px solid #e8ddd2; }
-#animalDetail .close { float:right; color:#8a7a6a; cursor:pointer; font-size:1.3rem; }
+.horo-item:hover { border-color:var(--gold); background:var(--card-hover); }
+.horo-item img { width:48px; height:48px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+.horo-item .info { flex:1; min-width:0; }
+.horo-item .info .name { font-weight:700; font-size:0.85rem; color:var(--gold); }
+.horo-item .info .preview { font-size:0.75rem; color:var(--text-dim); margin-top:3px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.horo-item .arrow { color:var(--gold); font-size:1.2rem; opacity:0.5; }
+
+/* ── Horoscope Expanded ── */
+.horo-expanded {
+  background:var(--card); border:1px solid var(--gold);
+  padding:16px; margin-top:-4px; margin-bottom:8px;
+  animation: modalIn 0.2s ease;
+}
+.horo-expanded .text { font-size:0.82rem; line-height:1.7; white-space:pre-wrap; color:var(--text); }
+.horo-expanded .lucky { font-size:0.75rem; color:var(--gold); margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
+
+/* ── Period Tabs ── */
+.period-tabs {
+  display:flex; gap:4px; margin-bottom:12px; overflow-x:auto;
+}
+.period-tabs button {
+  padding:6px 14px; border:1px solid var(--border); background:var(--card);
+  color:var(--text-dim); cursor:pointer; font-size:0.72rem;
+  font-family:'Noto Sans SC', sans-serif; white-space:nowrap;
+  transition:0.2s; border-radius:2px;
+}
+.period-tabs button.active { border-color:var(--gold); color:var(--gold); background:rgba(212,160,23,0.08); }
+.period-tabs button:hover { border-color:var(--gold); color:var(--gold); }
+
+/* ── Nav Tabs ── */
+.nav {
+  position:fixed; bottom:0; left:0; right:0; z-index:50;
+  display:flex; justify-content:space-around; align-items:center;
+  background: linear-gradient(180deg, rgba(10,6,4,0.97), rgba(10,6,4,1));
+  border-top:1px solid var(--border);
+  padding:8px 0 14px; max-width:680px; margin:0 auto;
+}
+.nav button {
+  background:none; border:none; color:var(--text-dim);
+  font-size:0.65rem; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center;
+  gap:2px; padding:6px 14px;
+  font-family:'Noto Sans SC', sans-serif; transition:0.2s;
+  letter-spacing:1px;
+}
+.nav button.active { color:var(--gold); }
+.nav button i { font-size:1.2rem; filter:brightness(0.7); }
+.nav button.active i { filter:brightness(1); }
+
+/* ── Section Tabs ── */
+.section { display:none; }
+.section.active { display:block; }
+
+/* ── Compatibility ── */
+.comp-animals { display:flex; align-items:center; justify-content:center; gap:12px; margin:10px 0; }
+.comp-animals .ca { text-align:center; }
+.comp-animals .ca img { width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid var(--border); }
+.comp-animals .ca .lbl { font-size:0.7rem; color:var(--gold); margin-top:4px; }
+.comp-animals .heart { font-size:1.5rem; color:var(--red); }
+.compat-bar { height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; margin:8px 0; }
+.compat-bar-fill { height:100%; border-radius:3px; transition:width 0.5s; }
+.compat-level { font-size:1.1rem; font-weight:700; text-align:center; }
+.compat-desc { font-size:0.8rem; color:var(--text-dim); text-align:center; margin-top:8px; line-height:1.6; }
+
+/* ── Auth ── */
+.auth-msg { margin-top:8px; padding:8px; font-size:0.78rem; display:none; border-radius:2px; }
+.auth-msg.error { display:block; background:rgba(180,30,30,0.15); border-left:3px solid var(--red); color:#ff6b6b; }
+.auth-msg.success { display:block; background:rgba(76,175,80,0.1); border-left:3px solid #4caf50; color:#69f0ae; }
+.profile-badge {
+  display:inline-block; background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  color:var(--bg); padding:2px 14px; font-size:0.7rem; font-weight:700; letter-spacing:1px;
+}
 
 /* ── Calc Result ── */
 .calc-result {
-  background:linear-gradient(135deg,#fdf6f0,#fcfaf7);
-  border:1px solid #e8ddd2; border-radius:6px; padding:16px; text-align:center;
-  margin-top:10px;
+  text-align:center; padding:14px; margin-top:10px;
+  background:rgba(180,30,30,0.08); border:1px solid var(--border);
 }
-.calc-result img { width:64px; height:64px; border-radius:50%; object-fit:cover; }
-.calc-result h3 { color:#c62828; margin:6px 0; }
-.calc-result p { font-size:0.8rem; color:#6a5a4a; }
-
-/* ── Comp Result ── */
-.compat-result { text-align:center; padding:16px; }
-.compat-result .animals { display:flex; align-items:center; justify-content:center; gap:12px; font-size:1.5rem; font-weight:700; margin:10px 0; }
-.compat-result .animals img { width:44px; height:44px; border-radius:50%; object-fit:cover; }
-.compat-result .bar { height:6px; background:#ebe3d8; border-radius:3px; overflow:hidden; margin:10px 0; }
-.compat-result .bar .fill { height:100%; border-radius:3px; transition:width 0.5s; }
-.compat-result .level { font-size:1.1rem; font-weight:700; }
-.compat-result .desc { font-size:0.85rem; color:#6a5a4a; margin-top:8px; }
-
-/* ── Auth ── */
-.auth-msg { margin-top:10px; padding:10px; border-radius:4px; font-size:0.8rem; display:none; }
-.auth-msg.error { display:block; background:#fff0f0; color:#c62828; border-left:3px solid #c62828; }
-.auth-msg.success { display:block; background:#f0fff0; color:#2e7d32; border-left:3px solid #2e7d32; }
-
-/* ── Profile ── */
-.profile-badge {
-  display:inline-block; background:linear-gradient(135deg,#d4a017,#b89400);
-  color:#fff; padding:2px 12px; border-radius:3px; font-size:0.7rem; font-weight:700;
-}
-#profileSection .card img { width:64px; height:64px; border-radius:50%; object-fit:cover; display:block; margin:0 auto 8px; }
-#profileSection .card .name { text-align:center; font-weight:700; font-size:1rem; }
-#profileSection .card .sub { text-align:center; font-size:0.8rem; color:#8a7a6a; }
+.calc-result img { width:72px; height:72px; border-radius:50%; object-fit:cover; border:2px solid var(--gold); margin-bottom:6px; }
+.calc-result h3 { font-size:1.2rem; color:var(--gold); margin:4px 0; }
+.calc-result p { font-size:0.78rem; color:var(--text-dim); line-height:1.5; }
 
 /* ── Footer ── */
-.footer { text-align:center; padding:20px; font-size:0.7rem; color:#a09080; border-top:1px solid #e0d5c8; margin-top:20px; }
+.footer { text-align:center; padding:24px 0; font-size:0.65rem; color:var(--text-dim); opacity:0.5; letter-spacing:1px; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--red); border-radius:2px; }
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
 <div class="header">
-  <h1><span class="gold">Astro</span><span class="red">Chino</span></h1>
-  <div class="sub">HORÓSCOPO CHINO — 生肖</div>
+  <h1>AstroChino</h1>
+  <div class="cn">生肖 · 占星</div>
 </div>
 
-<div class="nav-tabs">
-  <button class="active" data-tab="home">Hoy</button>
-  <button data-tab="signos">Signos</button>
-  <button data-tab="compat">Compatibilidad</button>
-  <button data-tab="cuenta">Cuenta</button>
-</div>
+<div class="year-banner" id="yearBanner"></div>
 
 <div class="container">
 
-  <!-- ── HOME ── -->
-  <div class="section active" id="tab-home">
-    <div class="card">
-      <div class="card-title"><span class="icon">🔮</span> ¿Cuál es tu signo chino?</div>
-      <div class="row">
-        <select id="calcDay"></select>
-        <select id="calcMonth"></select>
-        <select id="calcYear"></select>
-      </div>
-      <button class="btn btn-full" onclick="calcSign()">Consultar</button>
-      <div id="calcResult"></div>
-    </div>
+<!-- ── HOME ── -->
+<div class="section active" id="tab-home">
 
-    <div id="dailyList"></div>
-  </div>
-
-  <!-- ── SIGNOS ── -->
-  <div class="section" id="tab-signos">
-    <div class="card">
-      <div class="card-title"><span class="icon">🐾</span> Los 12 Animales</div>
-      <div class="animal-grid" id="animalGrid"></div>
-    </div>
-    <div id="animalDetail">
-      <span class="close" onclick="closeDetail()">✕</span>
-      <div class="top">
-        <img id="detImg" alt="">
-        <div>
-          <h2 id="detName"></h2>
-          <div class="meta" id="detMeta"></div>
-        </div>
-      </div>
-      <div class="desc" id="detDesc"></div>
-      <div class="lucky" id="detLucky"></div>
+  <div class="card">
+    <div class="card-title">El Horóscopo Chino</div>
+    <div class="about-text" id="aboutText">
+      <p>El horóscopo chino, o <span class="highlight">Shēngxiào</span> (生肖), es un sistema astrológico milenario que asigna un animal y sus atributos a cada año en un ciclo de 12 años. Nacido de la antigua filosofía china, este zodiaco está profundamente entrelazado con el <span class="highlight">Yin y Yang</span>, los <span class="highlight">Cinco Elementos</span> (Madera, Fuego, Tierra, Metal, Agua) y la teoría de los <span class="highlight">Tres Acuerdos</span> (三合).</p>
+      <p>Cada animal del zodiaco chino posee características únicas que influyen en la personalidad, la compatibilidad y el destino de quienes nacen bajo su signo. La leyenda dice que el Emperador de Jade convocó a todos los animales para una carrera, y los primeros 12 en llegar recibieron un lugar en el calendario.</p>
+      <p>Descubrí tu signo, consultá el horóscopo diario y explorá la sabiduría ancestral del zodiaco chino.</p>
     </div>
   </div>
 
-  <!-- ── COMPAT ── -->
-  <div class="section" id="tab-compat">
-    <div class="card">
-      <div class="card-title"><span class="icon">❤️</span> Compatibilidad de Signos</div>
+  <div class="card" id="calcCard">
+    <div class="card-title">¿Cuál es tu signo?</div>
+    <div class="calc-row">
+      <select id="calcDay"></select>
+      <select id="calcMonth"></select>
+      <select id="calcYear"></select>
+    </div>
+    <button class="btn btn-full" onclick="calcSign()">Consultar</button>
+    <div id="calcResult"></div>
+  </div>
+
+  <div class="divider"><span>◆ ◇ ◆</span></div>
+
+  <div id="periodNav" class="period-tabs"></div>
+  <div id="horoList"></div>
+</div>
+
+<!-- ── SIGNOS ── -->
+<div class="section" id="tab-signos">
+  <div class="card">
+    <div class="card-title">Los 12 Animales</div>
+    <div class="animal-grid" id="animalGrid"></div>
+  </div>
+</div>
+
+<!-- ── COMPAT ── -->
+<div class="section" id="tab-compat">
+  <div class="card">
+    <div class="card-title">Compatibilidad</div>
+    <div class="calc-row">
       <select id="comp1"></select>
       <select id="comp2"></select>
-      <button class="btn btn-full" onclick="checkCompat()">Ver compatibilidad</button>
-      <div id="compResult"></div>
+    </div>
+    <button class="btn btn-full" onclick="checkCompat()">Consultar</button>
+    <div id="compResult"></div>
+  </div>
+</div>
+
+<!-- ── CUENTA ── -->
+<div class="section" id="tab-cuenta">
+  <div id="authSection">
+    <div class="card" id="registerForm">
+      <div class="card-title">Crear Cuenta</div>
+      <input type="email" id="regEmail" placeholder="Email" style="width:100%;margin-bottom:6px;">
+      <input type="text" id="regName" placeholder="Nombre" style="width:100%;margin-bottom:6px;">
+      <input type="password" id="regPass" placeholder="Contraseña" style="width:100%;margin-bottom:8px;">
+      <label style="font-size:0.72rem;color:var(--text-dim);">Fecha de nacimiento</label>
+      <div class="calc-row">
+        <select id="regDay"></select>
+        <select id="regMonth"></select>
+        <select id="regYear"></select>
+      </div>
+      <button class="btn btn-full" onclick="register()">Registrarse</button>
+      <div id="regMsg" class="auth-msg"></div>
+      <p style="margin-top:10px;font-size:0.72rem;text-align:center;color:var(--text-dim);">
+        ¿Ya tenés cuenta? <a href="#" onclick="toggleAuth(true)" style="color:var(--gold);">Iniciar sesión</a>
+      </p>
+    </div>
+    <div class="card" id="loginForm" style="display:none;">
+      <div class="card-title">Iniciar Sesión</div>
+      <input type="email" id="loginEmail" placeholder="Email" style="width:100%;margin-bottom:6px;">
+      <input type="password" id="loginPass" placeholder="Contraseña" style="width:100%;margin-bottom:8px;">
+      <button class="btn btn-full" onclick="login()">Ingresar</button>
+      <div id="loginMsg" class="auth-msg"></div>
+      <p style="margin-top:10px;font-size:0.72rem;text-align:center;color:var(--text-dim);">
+        ¿No tenés cuenta? <a href="#" onclick="toggleAuth(false)" style="color:var(--gold);">Registrarse</a>
+      </p>
     </div>
   </div>
-
-  <!-- ── CUENTA ── -->
-  <div class="section" id="tab-cuenta">
-    <div id="authSection">
-      <div class="card" id="registerForm">
-        <div class="card-title"><span class="icon">📝</span> Crear Cuenta</div>
-        <input type="email" id="regEmail" placeholder="Email">
-        <input type="text" id="regName" placeholder="Nombre">
-        <input type="password" id="regPass" placeholder="Contraseña">
-        <label style="font-size:0.75rem;color:#8a7a6a;">Fecha de nacimiento</label>
-        <div class="row">
-          <select id="regDay"></select>
-          <select id="regMonth"></select>
-          <select id="regYear"></select>
-        </div>
-        <button class="btn btn-full" onclick="register()">Registrarse</button>
-        <div id="regMsg" class="auth-msg"></div>
-        <p style="margin-top:10px;font-size:0.75rem;text-align:center;color:#8a7a6a;">
-          ¿Ya tenés cuenta? <a href="#" onclick="toggleAuth(true)" style="color:#c62828;">Iniciar sesión</a>
-        </p>
-      </div>
-      <div class="card" id="loginForm" style="display:none;">
-        <div class="card-title"><span class="icon">🔑</span> Iniciar Sesión</div>
-        <input type="email" id="loginEmail" placeholder="Email">
-        <input type="password" id="loginPass" placeholder="Contraseña">
-        <button class="btn btn-full" onclick="login()">Ingresar</button>
-        <div id="loginMsg" class="auth-msg"></div>
-        <p style="margin-top:10px;font-size:0.75rem;text-align:center;color:#8a7a6a;">
-          ¿No tenés cuenta? <a href="#" onclick="toggleAuth(false)" style="color:#c62828;">Registrarse</a>
-        </p>
-      </div>
+  <div id="profileSection" style="display:none;">
+    <div class="card" style="text-align:center;">
+      <img id="profImg" src="" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);margin:0 auto 8px;display:block;">
+      <div style="font-weight:700;font-size:1rem;" id="profName"></div>
+      <div style="font-size:0.78rem;color:var(--text-dim);margin-top:4px;" id="profSub"></div>
+      <div style="margin:12px 0;" id="profPremium"></div>
+      <div id="premiumSection"></div>
+      <button class="btn btn-sm btn-outline" onclick="logout()" style="margin-top:12px;">Cerrar sesión</button>
+      <div id="profileMsg" class="auth-msg"></div>
     </div>
-    <div id="profileSection" style="display:none;">
-      <div class="card" style="text-align:center;">
-        <img id="profImg" src="" alt="">
-        <div class="name" id="profName"></div>
-        <div class="sub" id="profSub"></div>
-        <div style="margin:10px 0;" id="profPremium"></div>
-        <div id="premiumSection"></div>
-        <button class="btn btn-sm" onclick="logout()" style="margin-top:10px;">Cerrar sesión</button>
-        <div id="profileMsg" class="auth-msg"></div>
+  </div>
+</div>
+
+<div class="footer">AstroChino © 2026</div>
+</div>
+
+<div class="nav">
+  <button class="active" data-tab="home"><i class="fas fa-star"></i> Hoy</button>
+  <button data-tab="signos"><i class="fas fa-dragon"></i> Signos</button>
+  <button data-tab="compat"><i class="fas fa-yin-yang"></i> Compat</button>
+  <button data-tab="cuenta"><i class="fas fa-user"></i> Cuenta</button>
+</div>
+
+<!-- ── Animal Detail Modal ── -->
+<div class="modal-overlay" id="animalModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-top">
+      <img id="modalImg" src="" alt="">
+      <h2 id="modalName"></h2>
+      <div class="meta" id="modalMeta"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <h3>Personalidad</h3>
+        <p id="modalPersonality"></p>
+      </div>
+      <div class="modal-section">
+        <h3>Años de este signo</h3>
+        <div class="modal-years" id="modalYears"></div>
+      </div>
+      <div class="modal-section">
+        <h3>Elemento y Polaridad</h3>
+        <p id="modalElement"></p>
+      </div>
+      <div class="modal-section">
+        <h3>Suerte</h3>
+        <p id="modalLucky"></p>
+      </div>
+      <div class="modal-section">
+        <h3>Compatibilidad</h3>
+        <p id="modalCompat"></p>
       </div>
     </div>
   </div>
-
-  <div class="footer">AstroChino © 2026 — Tu guía del zodiaco chino</div>
 </div>
 
 <script>
 const API = '';
 let token = localStorage.getItem('token');
+let currentPeriod = 'today';
 
 const ANIMALS = ['Rata','Buey','Tigre','Conejo','Dragón','Serpiente','Caballo','Cabra','Mono','Gallo','Perro','Cerdo'];
 const ANIMAL_IMGS = [
@@ -273,6 +510,43 @@ const ANIMAL_IMGS = [
   '/static/images/Caballo.jpg','/static/images/Cabra.jpg','/static/images/Mono.jpg',
   '/static/images/Gallo.jpg','/static/images/Perro.jpg','/static/images/Cerdo.jpg'
 ];
+
+const YEARS_BY_ANIMAL = ANIMALS.map((_, i) => {
+  const years = [];
+  for (let y = 2026; y >= 1900; y -= 12) years.push(y);
+  for (let y = 2026 + 12; y <= 2040; y += 12) years.push(y);
+  return years.sort((a,b)=>b-a);
+});
+
+const LUCKY_STONES = {
+  'Rata': ['Amatista', 'Ojo de tigre', 'Cuarzo rosa'],
+  'Buey': ['Jade', 'Ónix', 'Ágata'],
+  'Tigre': ['Ojo de halcón', 'Citrino', 'Granate'],
+  'Conejo': ['Jade blanco', 'Cuarzo rosa', 'Perla'],
+  'Dragón': ['Jade verde', 'Ópalo', 'Rubí'],
+  'Serpiente': ['Ojo de gato', 'Malaquita', 'Turquesa'],
+  'Caballo': ['Granate', 'Cornalina', 'Ojo de tigre'],
+  'Cabra': ['Cuarzo rosa', 'Jade', 'Amatista'],
+  'Mono': ['Obsidiana', 'Lapislázuli', 'Citrino'],
+  'Gallo': ['Topacio', 'Ámbar', 'Ojo de halcón'],
+  'Perro': ['Zafiro', 'Ónix', 'Jade'],
+  'Cerdo': ['Rubí', 'Turmalina', 'Cuarzo']
+};
+
+const COMPAT_DESC = {
+  'Rata': 'Excelente con Dragón y Mono. Desafiante con Caballo.',
+  'Buey': 'Excelente con Serpiente y Gallo. Desafiante con Cabra.',
+  'Tigre': 'Excelente con Caballo y Perro. Desafiante con Mono.',
+  'Conejo': 'Excelente con Cerdo y Cabra. Desafiante con Gallo.',
+  'Dragón': 'Excelente con Rata y Mono. Desafiante con Perro.',
+  'Serpiente': 'Excelente con Gallo y Buey. Desafiante con Cerdo.',
+  'Caballo': 'Excelente con Tigre y Perro. Desafiante con Rata.',
+  'Cabra': 'Excelente con Cerdo y Conejo. Desafiante con Buey.',
+  'Mono': 'Excelente con Rata y Dragón. Desafiante con Tigre.',
+  'Gallo': 'Excelente con Buey y Serpiente. Desafiante con Conejo.',
+  'Perro': 'Excelente con Tigre y Caballo. Desafiante con Dragón.',
+  'Cerdo': 'Excelente con Conejo y Cabra. Desafiante con Serpiente.'
+};
 
 async function api(path, opts={}) {
   const headers = {'Content-Type':'application/json'};
@@ -283,20 +557,35 @@ async function api(path, opts={}) {
 }
 
 function showTab(tab) {
-  document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   if (tab === 'signos') loadAnimalGrid();
   if (tab === 'cuenta' && token) fetchProfile();
 }
-
-document.querySelectorAll('.nav-tabs button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+document.querySelectorAll('.nav button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
 
 function toggleAuth(showLogin) {
   document.getElementById('registerForm').style.display = showLogin ? 'none' : 'block';
   document.getElementById('loginForm').style.display = showLogin ? 'block' : 'none';
 }
 
+// ── Year Info ──
+async function loadYearInfo() {
+  try {
+    const d = await api('/api/year-info');
+    const info = d.info;
+    document.getElementById('yearBanner').innerHTML = `
+      <div class="label">Año ${info.chinese_year} · ${info.name_cn}</div>
+      <div class="animal">🐴 ${info.animal} de ${info.element}</div>
+      <div class="sub">${info.start_date} — ${info.end_date} · ${info.yin_yang}</div>
+      <div class="desc">${info.description}</div>
+      <div class="desc" style="margin-top:6px;font-size:0.75rem;color:var(--gold);font-weight:600;">${info.advice}</div>
+    `;
+  } catch(e) {}
+}
+
+// ── Auth ──
 async function register() {
   const email = document.getElementById('regEmail').value, pass = document.getElementById('regPass').value, name = document.getElementById('regName').value;
   const year = parseInt(document.getElementById('regYear').value), month = parseInt(document.getElementById('regMonth').value), day = parseInt(document.getElementById('regDay').value);
@@ -305,12 +594,10 @@ async function register() {
   try {
     const d = await api('/api/register', {method:'POST', body:JSON.stringify({email, password:pass, nombre:name, birth_year:year, birth_month:month, birth_day:day})});
     token = d.token; localStorage.setItem('token', token);
-    msg.innerHTML='✓ Registrado! Tu animal es ' + d.animal;
-    msg.className='auth-msg success';
+    msg.innerHTML='✓ Registrado! Tu animal es ' + d.animal; msg.className='auth-msg success';
     setTimeout(fetchProfile, 1200);
   } catch(e) { msg.textContent=e.message; msg.className='auth-msg error'; }
 }
-
 async function login() {
   const email = document.getElementById('loginEmail').value, pass = document.getElementById('loginPass').value;
   const msg = document.getElementById('loginMsg');
@@ -322,7 +609,6 @@ async function login() {
     setTimeout(fetchProfile, 1000);
   } catch(e) { msg.textContent=e.message; msg.className='auth-msg error'; }
 }
-
 async function fetchProfile() {
   if (!token) return;
   try {
@@ -337,69 +623,68 @@ async function fetchProfile() {
       document.getElementById('profPremium').innerHTML = '<span class="profile-badge">✦ PREMIUM</span>';
       document.getElementById('premiumSection').innerHTML = '';
     } else {
-      document.getElementById('profPremium').textContent = 'Plan gratuito';
-      document.getElementById('premiumSection').innerHTML = '<button class="btn btn-sm" onclick="alert(\'Próximamente\')">Premium $2/mes</button>';
+      document.getElementById('profPremium').innerHTML = '<span style="font-size:0.78rem;color:var(--text-dim);">Plan gratuito</span>';
+      document.getElementById('premiumSection').innerHTML = '<button class="btn btn-sm btn-gold" onclick="alert(\'Próximamente disponible\')">Premium $2/mes</button>';
     }
   } catch(e) { logout(); }
 }
-
 function logout() { token=null; localStorage.removeItem('token'); document.getElementById('authSection').style.display='block'; document.getElementById('profileSection').style.display='none'; }
 
-async function loadDaily() {
-  const el = document.getElementById('dailyList');
+// ── Horoscope ──
+async function loadHoroscopes(period) {
+  currentPeriod = period;
+  document.querySelectorAll('.period-tabs button').forEach(b => b.classList.toggle('active', b.dataset.period === period));
+  const el = document.getElementById('horoList');
   try {
     const d = await api('/api/animals');
     el.innerHTML = d.animals.map((a,i) =>
-      `<div class="animal-card" onclick="showHoroscope('${a.name}')">
+      `<div class="horo-item" onclick="showHoroscope('${a.name}','${period}')">
         <img src="${ANIMAL_IMGS[i]}" alt="${a.name}" loading="lazy">
         <div class="info">
           <div class="name">${a.name}</div>
-          <div class="preview">Cargando horóscopo...</div>
-          <span class="tag">${a.element} · ${a.polarity}</span>
+          <div class="preview">Cargando...</div>
         </div>
         <div class="arrow">›</div>
       </div>`
     ).join('');
-    // Load horoscopes
     d.animals.forEach(async (a,i) => {
       try {
-        const h = await api('/api/horoscope/' + a.name);
+        const h = await api('/api/horoscope/' + a.name + '?period=' + period);
         const card = el.children[i];
-        if (card) card.querySelector('.preview').textContent = h.horoscope.slice(0, 100) + '...';
+        if (card) card.querySelector('.preview').textContent = h.horoscope.slice(0, 80) + '...';
       } catch(e) {}
     });
-  } catch(e) { el.innerHTML = '<p style="color:#8a7a6a;">Error al cargar</p>'; }
+  } catch(e) { el.innerHTML = '<p style="color:var(--text-dim);">Error al cargar</p>'; }
 }
 
-async function showHoroscope(name) {
+async function showHoroscope(name, period) {
   try {
-    const h = await api('/api/horoscope/' + name);
+    const h = await api('/api/horoscope/' + name + '?period=' + period);
     const idx = ANIMALS.indexOf(h.animal);
-    const el = document.getElementById('dailyList');
-    // Find the card and expand it
-    const existing = el.querySelector('.horoscope-expanded');
+    const list = document.getElementById('horoList');
+    const existing = list.querySelector('.horo-expanded');
     if (existing) existing.remove();
     const div = document.createElement('div');
-    div.className = 'horoscope-expanded';
-    div.style.cssText = 'background:#fff;border:1px solid #c62828;border-radius:6px;padding:16px;margin-top:-8px;margin-bottom:10px;';
+    div.className = 'horo-expanded';
     div.innerHTML = `<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
       <img src="${ANIMAL_IMGS[idx]}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">
-      <div><strong style="font-size:1rem;">${h.animal}</strong><div style="font-size:0.75rem;color:#8a7a6a;">${h.date}</div></div>
+      <div><strong style="font-size:0.9rem;color:var(--gold);">${h.animal}</strong><div style="font-size:0.7rem;color:var(--text-dim);">${h.date}</div></div>
     </div>
-    <div style="font-size:0.85rem;line-height:1.7;white-space:pre-wrap;">${h.horoscope}</div>
-    <div style="font-size:0.75rem;color:#8a7a6a;margin-top:10px;">🍀 ${h.lucky?.numeros?.join(', ')} · ${h.lucky?.colores?.join(', ')}</div>`;
-    const card = el.children[idx];
+    <div class="text">${h.horoscope}</div>
+    <div class="lucky">Números: ${h.lucky?.numeros?.join(', ')} · Colores: ${h.lucky?.colores?.join(', ')}</div>`;
+    const card = list.children[idx];
     if (card) card.after(div);
     div.scrollIntoView({behavior:'smooth', block:'center'});
-  } catch(e) { alert('Error al cargar horóscopo'); }
+  } catch(e) { alert('Error al cargar'); }
 }
 
+// ── Animal Grid ──
 async function loadAnimalGrid() {
   try {
     const d = await api('/api/animals');
     document.getElementById('animalGrid').innerHTML = d.animals.map((a,i) =>
-      `<div class="item" onclick="showAnimal('${a.name}')">
-        <img src="${ANIMAL_IMGS[i]}" alt="${a.name}" loading="lazy">
+      `<div class="animal-card" onclick="openModal(${i})">
+        <div class="img-wrap"><img src="${ANIMAL_IMGS[i]}" alt="${a.name}" loading="lazy"></div>
         <div class="name">${a.name}</div>
         <div class="sub">${a.element} · ${a.polarity}</div>
       </div>`
@@ -407,23 +692,48 @@ async function loadAnimalGrid() {
   } catch(e) {}
 }
 
-async function showAnimal(name) {
+// ── Modal ──
+async function openModal(idx) {
+  const name = ANIMALS[idx];
+  const modal = document.getElementById('animalModal');
+  modal.classList.add('show');
+  document.getElementById('modalImg').src = ANIMAL_IMGS[idx];
+  document.getElementById('modalName').textContent = name;
+  document.getElementById('modalMeta').textContent = '';
+  document.getElementById('modalPersonality').textContent = 'Cargando...';
+  document.getElementById('modalElement').textContent = '';
+  document.getElementById('modalLucky').textContent = '';
+  document.getElementById('modalCompat').textContent = '';
+  document.getElementById('modalYears').innerHTML = YEARS_BY_ANIMAL[idx].slice(0,12).map(y => `<span class="year">${y}</span>`).join('');
+
   try {
     const d = await api('/api/animal/' + name);
-    const idx = ANIMALS.indexOf(d.animal.name);
-    const el = document.getElementById('animalDetail');
-    document.getElementById('detImg').src = ANIMAL_IMGS[idx];
-    document.getElementById('detName').textContent = d.animal.name;
-    document.getElementById('detMeta').textContent = `${d.animal.element} · ${d.animal.polarity} · ${d.animal.branch} · ${d.animal.hours} · ${d.animal.seasons}`;
-    document.getElementById('detDesc').textContent = d.personality;
-    document.getElementById('detLucky').innerHTML = `🍀 Números de la suerte: ${d.lucky?.numeros?.join(', ')} · Colores: ${d.lucky?.colores?.join(', ')} · Dirección: ${d.lucky?.direccion || '-'}`;
-    el.style.display = 'block';
-    el.scrollIntoView({behavior:'smooth'});
-  } catch(e) { alert('Error'); }
+    document.getElementById('modalMeta').textContent = `${d.animal.element} · ${d.animal.polarity} · ${d.animal.branch} · ${d.animal.hours} · ${d.animal.seasons}`;
+    document.getElementById('modalPersonality').textContent = d.personality;
+    document.getElementById('modalElement').innerHTML = `
+      <span class="tag">${d.animal.element}</span>
+      <span class="tag">${d.animal.polarity}</span>
+      <span class="tag">${d.animal.branch}</span>
+      <span class="tag">${d.animal.hours}</span>
+      <span class="tag">${d.animal.seasons}</span>`;
+    document.getElementById('modalLucky').innerHTML = `
+      <strong>Números:</strong> ${d.lucky?.numeros?.join(', ')}<br>
+      <strong>Colores:</strong> ${d.lucky?.colores?.join(', ')}<br>
+      <strong>Dirección:</strong> ${d.lucky?.direccion || '-'}<br>
+      <strong>Piedras:</strong> ${LUCKY_STONES[name]?.join(', ') || '-'}`;
+    document.getElementById('modalCompat').textContent = COMPAT_DESC[name] || '';
+  } catch(e) {
+    document.getElementById('modalPersonality').textContent = 'Información no disponible';
+  }
 }
+function closeModal() {
+  document.getElementById('animalModal').classList.remove('show');
+}
+document.getElementById('animalModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
 
-function closeDetail() { document.getElementById('animalDetail').style.display = 'none'; }
-
+// ── Calc ──
 async function calcSign() {
   const year = parseInt(document.getElementById('calcYear').value), month = parseInt(document.getElementById('calcMonth').value), day = parseInt(document.getElementById('calcDay').value);
   const el = document.getElementById('calcResult');
@@ -432,36 +742,36 @@ async function calcSign() {
     el.innerHTML = `<div class="calc-result">
       <img src="${ANIMAL_IMGS[d.animal.id]}" alt="${d.animal.name}">
       <h3>${d.animal.name}</h3>
-      <p>${d.element} · ${d.animal.polarity}</p>
+      <p>${d.element} · ${d.animal.polarity} · ${d.animal.branch}</p>
       <p style="margin-top:6px;">${d.personality}</p>
     </div>`;
-  } catch(e) { el.innerHTML = '<p style="color:#c62828;font-size:0.85rem;margin-top:8px;">Error</p>'; }
+  } catch(e) { el.innerHTML = '<p style="color:var(--red);font-size:0.8rem;margin-top:8px;">Error al consultar</p>'; }
 }
 
+// ── Compat ──
 async function checkCompat() {
   const a1 = document.getElementById('comp1').value, a2 = document.getElementById('comp2').value;
   const el = document.getElementById('compResult');
-  if (!a1||!a2) { el.innerHTML = '<p style="color:#8a7a6a;margin-top:8px;">Seleccioná dos animales</p>'; return; }
+  if (!a1||!a2) { el.innerHTML = '<p style="color:var(--text-dim);margin-top:8px;">Seleccioná dos animales</p>'; return; }
   try {
     const d = await api('/api/compatibility?animal1='+a1+'&animal2='+a2);
     const c = d.compatibility;
-    const colors = {Excelente:'#d4a017',Buena:'#4caf50',Neutral:'#ff9800',Desafiante:'#e91e63',Conflicto:'#c62828'};
+    const colors = {Excelente:'var(--gold)',Buena:'#4caf50',Neutral:'#ff9800',Desafiante:'#e91e63',Conflicto:'var(--red)'};
     const idx1 = ANIMALS.indexOf(d.animal1.name), idx2 = ANIMALS.indexOf(d.animal2.name);
-    el.innerHTML = `<div class="compat-result">
-      <div class="animals">
-        <img src="${ANIMAL_IMGS[idx1]}"><span>${d.animal1.name}</span>
-        <span style="color:#c62828;">❤</span>
-        <img src="${ANIMAL_IMGS[idx2]}"><span>${d.animal2.name}</span>
+    el.innerHTML = `
+      <div class="comp-animals">
+        <div class="ca"><img src="${ANIMAL_IMGS[idx1]}"><div class="lbl">${d.animal1.name}</div></div>
+        <div class="heart">❤</div>
+        <div class="ca"><img src="${ANIMAL_IMGS[idx2]}"><div class="lbl">${d.animal2.name}</div></div>
       </div>
-      <div class="bar"><div class="fill" style="width:${c.score}%;background:${colors[c.level]||'#888'};"></div></div>
-      <div class="level" style="color:${colors[c.level]||'#888'};">${c.level} (${c.score}%)</div>
-      <div class="desc">${c.desc}</div>
-    </div>`;
-  } catch(e) { el.innerHTML = '<p style="color:#c62828;">Error</p>'; }
+      <div class="compat-bar"><div class="compat-bar-fill" style="width:${c.score}%;background:${colors[c.level]||'#888'};"></div></div>
+      <div class="compat-level" style="color:${colors[c.level]||'#888'};">${c.level} (${c.score}%)</div>
+      <div class="compat-desc">${c.desc}</div>`;
+  } catch(e) { el.innerHTML = '<p style="color:var(--red);">Error</p>'; }
 }
 
-// Init
-(function() {
+// ── Init ──
+(function init() {
   const days = Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('');
   const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'].map((m,i)=>`<option value="${i+1}">${m}</option>`).join('');
   const years = Array.from({length:100},(_,i)=>`<option value="${2026-i}">${2026-i}</option>`).join('');
@@ -474,7 +784,19 @@ async function checkCompat() {
       ANIMALS.map((a,i)=>`<option value="${a}">${a}</option>`).join('');
   });
 
-  loadDaily();
+  const periods = [
+    {key:'today',label:'Hoy'},
+    {key:'tomorrow',label:'Mañana'},
+    {key:'weekly',label:'Semanal'},
+    {key:'monthly',label:'Mensual'},
+    {key:'yearly',label:'Anual'}
+  ];
+  document.getElementById('periodNav').innerHTML = periods.map(p =>
+    `<button data-period="${p.key}" class="${p.key==='today'?'active':''}" onclick="loadHoroscopes('${p.key}')">${p.label}</button>`
+  ).join('');
+
+  loadYearInfo();
+  loadHoroscopes('today');
   if (token) fetchProfile();
 })();
 </script>

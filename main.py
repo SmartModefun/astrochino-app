@@ -256,12 +256,42 @@ async def compatibility(animal1: str, animal2: str):
     comp = get_compatibility(a1, a2)
     return {"success": True, "animal1": a1, "animal2": a2, "compatibility": comp}
 
+# ── Chinese Year Info ──────────────────────────────────
+CNY_INFO = {
+    "year": 2026,
+    "chinese_year": 4724,
+    "animal": "Caballo",
+    "element": "Fuego",
+    "yin_yang": "Yang",
+    "name_cn": "丙午",
+    "start_date": "17 de Febrero, 2026",
+    "end_date": "5 de Febrero, 2027",
+    "description": "El Año del Caballo de Fuego (丙午) es un año de acción, pasión y movimiento. El fuego alimenta la energía del Caballo, creando un período de gran dinamismo, impulsividad y transformación. Es un año para tomar riesgos calculados, perseguir metas con determinación y expresar la verdad sin miedo. La energía Yang del Caballo de Fuego favorece el liderazgo, la aventura y la expansión personal.",
+    "element_description": "El Fuego (火) representa la pasión, la creatividad y la transformación. Los años de Fuego son intensos, llenos de energía y cambios repentinos.",
+    "advice": "Aprovechá la energía del Caballo de Fuego para avanzar en tus proyectos, pero evitá decisiones impulsivas. Canalizá tu pasión con disciplina."
+}
+
+@app.get("/api/year-info")
+async def year_info():
+    return {"success": True, "info": CNY_INFO}
+
 # ── Horoscope ─────────────────────────────────────────
-async def generate_horoscope(animal_name: str) -> str:
+PERIOD_LABELS = {"today": "hoy", "tomorrow": "mañana", "weekly": "esta semana", "monthly": "este mes", "yearly": "este año"}
+
+async def generate_horoscope(animal_name: str, period: str = "today") -> str:
     animal = next(a for a in ANIMALS if a["name"] == animal_name)
     lucky = LUCKY.get(animal_name, {})
-    today = datetime.now(TZ_ARG).strftime("%d/%m/%Y")
-    prompt = f"Eres un astrólogo chino experto. Genera un horóscopo para {animal_name} ({animal['name_en']}) del {today} en español (máx 100 palabras). Incluye energía general del día, un aspecto destacado (amor/trabajo/salud), números de la suerte {lucky.get('numeros', [])} y el color del día. Texto plano."
+    now = datetime.now(TZ_ARG)
+    period_label = PERIOD_LABELS.get(period, "hoy")
+    date_str = now.strftime("%d/%m/%Y")
+    prompts = {
+        "today": f"Eres un astrólogo chino experto. Genera un horóscopo para {animal_name} ({animal['name_en']}) del {date_str} en español (máx 100 palabras). Incluye energía general del día, un aspecto destacado (amor/trabajo/salud), números de la suerte {lucky.get('numeros', [])} y el color del día. Texto plano.",
+        "tomorrow": f"Eres un astrólogo chino experto. Genera una predicción para {animal_name} ({animal['name_en']}) para MAÑANA {date_str} en español (máx 100 palabras). Incluye lo que se viene, oportunidades, precauciones y números de la suerte {lucky.get('numeros', [])}. Texto plano.",
+        "weekly": f"Eres un astrólogo chino experto. Genera un horóscopo SEMANAL para {animal_name} ({animal['name_en']}) en español (máx 120 palabras). Incluye tendencias generales de la semana, aspectos destacados en amor, trabajo y salud, y números de la suerte {lucky.get('numeros', [])}. Texto plano.",
+        "monthly": f"Eres un astrólogo chino experto. Genera un horóscopo MENSUAL para {animal_name} ({animal['name_en']}) en español (máx 150 palabras). Incluye panorama general del mes, predicciones por áreas (amor, trabajo, dinero, salud) y números de la suerte {lucky.get('numeros', [])}. Texto plano.",
+        "yearly": f"Eres un astrólogo chino experto. Genera un horóscopo ANUAL 2026 para {animal_name} ({animal['name_en']}) en español (máx 200 palabras). Incluye predicciones generales para el año, oportunidades, desafíos y consejos. Texto plano.",
+    }
+    prompt = prompts.get(period, prompts["today"])
     if LLM_API_KEY:
         try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={LLM_API_KEY}"
@@ -273,37 +303,56 @@ async def generate_horoscope(animal_name: str) -> str:
                     if text: return text.strip()
         except:
             pass
-    return _fallback_horoscope(animal_name)
+    return _fallback_horoscope(animal_name, period)
 
-def _fallback_horoscope(animal_name: str) -> str:
+def _fallback_horoscope(animal_name: str, period: str = "today") -> str:
     lucky = LUCKY.get(animal_name, {})
     colores = lucky.get('colores', ['Rojo'])
     numeros = lucky.get('numeros', [7])
+    period_label = PERIOD_LABELS.get(period, "hoy")
+    if period == "tomorrow":
+        return f"📅 Predicción para mañana de {animal_name}:\n\nLa energía se renueva. Mañana será un día para observar antes de actuar. Prestá atención a las señales del entorno.\n\n🔮 Consejo: Alguien cercano可能需要 tu ayuda. Estate atento.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}."
+    elif period == "weekly":
+        return f"📆 Horóscopo semanal para {animal_name}:\n\nEsta semana trae oportunidades de crecimiento. La energía del {CNY_INFO['animal']} de {CNY_INFO['element']} te impulsa a tomar la iniciativa.\n\n❤️ Amor: Buen momento para conversaciones profundas.\n💼 Trabajo: Avances en proyectos pendientes.\n💪 Salud: Mantené rutinas saludables.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}."
+    elif period == "monthly":
+        return f"📅 Horóscopo mensual para {animal_name}:\n\nPanorama general: Un mes de transformación. La energía del {CNY_INFO['element']} te invita a soltar lo que ya no sirve.\n\n❤️ Amor: Relaciones se profundizan. Buena época para compromisos.\n💼 Trabajo: Nuevas oportunidades profesionales.\n💰 Dinero: Mes estable, evitá gastos impulsivos.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}."
+    elif period == "yearly":
+        return f"🗓️ Horóscopo anual 2026 para {animal_name}:\n\nEl Año del Caballo de Fuego trae cambios dinámicos para {animal_name}. Es un año de acción y determinación.\n\n✨ Oportunidades: Grandes avances en carrera y proyectos personales.\n⚠️ Desafíos: Evitá la impulsividad. Pensá antes de actuar.\n💕 Amor: Los solteros encontrarán conexiones significativas.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}."
     plantillas = [
-        f"⚡ Energía general: Hoy {animal_name} siente una corriente de renovación. Es un día para tomar decisiones con claridad y avanzar sin dudas. Confiá en tu intuición.\n\n❤️ Amor: Las relaciones se profundizan si dedicás tiempo de calidad. Escuchá más de lo que hablás.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}.",
-        f"🌅 Mañana prometedora para {animal_name}. La energía del día te impulsa a concretar proyectos pendientes. Mantené el foco.\n\n💼 Trabajo: Momento de colaborar. Compartir ideas te abrirá puertas inesperadas.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}.",
-        f"🌀 {animal_name}, hoy la clave está en el equilibrio. No te dejes llevar por el impulso; observá antes de actuar.\n\n💪 Salud: Tu energía física está alta. Aprovechá para moverte y despejar la mente.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}.",
-        f"✨ Día de claridad para {animal_name}. Las nubes se disipan y ves el camino con nitidez. Actuá con confianza.\n\n🔮 Consejo: Algo que venías postergando encuentra su momento. No lo dejes pasar.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}.",
-        f"🌟 Buen día para {animal_name}. La energía del {random.choice(['Caballo de Fuego', 'Dragón', 'Tigre'])} te acompaña. Hoy todo fluye con naturalidad.\n\n💕 Amor: Si estás en pareja, sorprendé con un detalle simple. Si estás soltero, alguien del pasado reaparece.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}.",
+        f"⚡ Energía general: Hoy {animal_name} siente una corriente de renovación. Es un día para tomar decisiones con claridad.\n\n❤️ Amor: Las relaciones se profundizan si dedicás tiempo de calidad.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}.",
+        f"🌅 Mañana prometedora para {animal_name}. Mantené el foco en tus metas.\n\n💼 Trabajo: Momento de colaborar. Compartir ideas te abrirá puertas.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}.",
+        f"🌀 {animal_name}, hoy la clave está en el equilibrio. Observá antes de actuar.\n\n💪 Salud: Tu energía física está alta. Aprovechá para moverte.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}.",
+        f"✨ Día de claridad para {animal_name}. Las nubes se disipan y ves el camino con nitidez.\n\n🔮 Consejo: Algo que venías postergando encuentra su momento.\n\n🍀 Suerte: Números {numeros}, Color: {random.choice(colores)}.",
     ]
     return random.choice(plantillas)
 
 @app.get("/api/horoscope/{animal_name}")
-async def get_horoscope(animal_name: str):
+async def get_horoscope(animal_name: str, period: str = "today"):
     animal = next((a for a in ANIMALS if a["name"].lower() == animal_name.lower()), None)
     if not animal:
         raise HTTPException(404, "Animal no encontrado")
+    if period not in PERIOD_LABELS:
+        period = "today"
     today = datetime.now(TZ_ARG).strftime("%Y-%m-%d")
+    cache_key = f"{animal['name']}_{period}_{today}"
+    # For non-daily periods, use a weekly/monthly key
+    if period == "weekly":
+        week_start = datetime.now(TZ_ARG).strftime("%Y-W%W")
+        cache_key = f"{animal['name']}_{period}_{week_start}"
+    elif period == "monthly":
+        cache_key = f"{animal['name']}_{period}_{datetime.now(TZ_ARG).strftime('%Y-%m')}"
+    elif period == "yearly":
+        cache_key = f"{animal['name']}_{period}_2026"
     async with aiosqlite.connect(DB_PATH) as db:
-        row = await db.execute_fetchall("SELECT contenido FROM horoscopes WHERE animal=? AND date=?", (animal["name"], today))
+        row = await db.execute_fetchall("SELECT contenido FROM horoscopes WHERE animal=? AND date=?", (animal["name"], cache_key))
         if row:
             content = row[0][0]
         else:
-            content = await generate_horoscope(animal["name"])
-            await db.execute("INSERT OR REPLACE INTO horoscopes (animal, date, contenido) VALUES (?, ?, ?)", (animal["name"], today, content))
+            content = await generate_horoscope(animal["name"], period)
+            await db.execute("INSERT OR REPLACE INTO horoscopes (animal, date, contenido) VALUES (?, ?, ?)", (animal["name"], cache_key, content))
             await db.commit()
     lucky = LUCKY.get(animal["name"], {})
-    return {"success": True, "animal": animal["name"], "date": today, "horoscope": content, "lucky": lucky}
+    return {"success": True, "animal": animal["name"], "date": today, "period": period, "horoscope": content, "lucky": lucky}
 
 # ── Premium (PayPal same as La Astrología) ────────────
 @app.post("/api/set-premium")
