@@ -19,6 +19,21 @@ JWT_SECRET = os.getenv("JWT_SECRET") or "dev-secret-change-in-production"
 LLM_API_KEY = os.getenv("LLM_API_KEY") or ""
 GEMINI_MODEL = "gemini-2.5-flash"
 
+# ── PayPal ───────────────────────────────────────────────
+PAYPAL_SANDBOX = os.getenv("PAYPAL_SANDBOX", "false").lower() == "true"
+if PAYPAL_SANDBOX:
+    PAYPAL_CLIENT_ID = "ASEWf7lFIosrAjy8XwONVYkhL9FoKx1D64JsCvLl1qkfroMaR-r83_WhIMqTMnKycaKNv-2MyvokGQLF"
+    PAYPAL_CLIENT_SECRET = "EMdfD7jFxprkW1VW9PWRkYOm8gVuimVq6zB2LH_pmxquYebSruGdfSY6EUPri9dG5VWc9ceeAXGS3Jp-"
+    PAYPAL_WEBHOOK_ID = "8CP48652G95121503"
+else:
+    PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID") or ""
+    PAYPAL_CLIENT_SECRET = os.getenv("PAYPAL_CLIENT_SECRET") or ""
+    PAYPAL_WEBHOOK_ID = os.getenv("PAYPAL_WEBHOOK_ID") or ""
+PAYPAL_BASE = "https://api-m.sandbox.paypal.com" if PAYPAL_SANDBOX else "https://api-m.paypal.com"
+PREMIUM_PLAN_ID = os.getenv("PREMIUM_PLAN_ID") or ""
+_paypal_cached_token = None
+_paypal_cached_token_expires = 0
+
 # ── Chinese Zodiac Data ──────────────────────────────
 ANIMALS = [
     {"id": 0, "name": "Rata",   "name_en": "Rat",     "branch": "子", "hours": "23:00-01:00", "polarity": "Yang", "element": "Agua",   "trine": 0, "seasons": "Invierno medio"},
@@ -142,6 +157,7 @@ def init_db():
     with sqlite3.connect(DB_PATH) as db:
         db.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, password TEXT, nombre TEXT, animal TEXT NOT NULL DEFAULT '', birth_year INTEGER DEFAULT 0, signo TEXT DEFAULT '', premium INTEGER DEFAULT 0, notifications_enabled INTEGER DEFAULT 1, created_at TEXT DEFAULT (datetime('now')))")
         db.execute("CREATE TABLE IF NOT EXISTS horoscopes (animal TEXT, date TEXT, contenido TEXT, PRIMARY KEY (animal, date))")
+        db.execute("CREATE TABLE IF NOT EXISTS subscriptions (user_id INTEGER UNIQUE, paypal_subscription_id TEXT, status TEXT DEFAULT 'pending', plan TEXT DEFAULT 'monthly', current_period_start TEXT, current_period_end TEXT)")
         db.commit()
 
 init_db()
@@ -354,13 +370,179 @@ async def get_horoscope(animal_name: str, period: str = "today"):
     lucky = LUCKY.get(animal["name"], {})
     return {"success": True, "animal": animal["name"], "date": today, "period": period, "horoscope": content, "lucky": lucky}
 
-# ── Premium (PayPal same as La Astrología) ────────────
+# ── Premium (PayPal) ─────────────────────────────
 @app.post("/api/set-premium")
 async def set_premium(email: str = Depends(get_user)):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("UPDATE users SET premium=1 WHERE email=?", (email,))
         await db.commit()
     return {"success": True}
+
+# ── PayPal Helpers ───────────────────────────────────────
+async def _paypal_token() -> str:
+    global _paypal_cached_token, _paypal_cached_token_expires
+    if _paypal_cached_token and datetime.utcnow().timestamp() < _paypal_cached_token_expires - 60:
+        return _paypal_cached_token
+    if not PAYPAL_CLIENT_ID or not PAYPAL_CLIENT_SECRET:
+        raise HTTPException(503, "PayPal no está configurado")
+    async with httpx.AsyncClient() as client:
+        r = await client.post(
+            f"{PAYPAL_BASE}/v1/oauth2/token",
+            auth=(PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET),
+            data={"grant_type": "client_credentials"},
+            headers={"Accept": "application/json"},
+        )
+        r.raise_for_status()
+        data = r.json()
+        _paypal_cached_token = data["access_token"]
+        _paypal_cached_token_expires = datetime.utcnow().timestamp() + data.get("expires_in", 32400)
+        return _paypal_cached_token
+
+async def _paypal_create_product() -> str:
+    token = await _paypal_token()
+    async with httpx.AsyncClient() as client:
+        r = await client.post(
+            f"{PAYPAL_BASE}/v1/catalogs/products",
+            json={"name": "AstroChino Premium", "description": "Suscripción premium a AstroChino", "type": "SERVICE", "category": "SOFTWARE"},
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+        )
+        if r.status_code == 409:
+            return ""
+        r.raise_for_status()
+        return r.json()["id"]
+
+async def _paypal_find_or_create_plan() -> str:
+    if PREMIUM_PLAN_ID:
+        return PREMIUM_PLAN_ID
+    token = await _paypal_token()
+    async with httpx.AsyncClient() as client:
+        r = await client.get(
+            f"{PAYPAL_BASE}/v1/billing/plans",
+            params={"page_size": 20, "status": "ACTIVE"},
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+        )
+        if r.status_code == 200:
+            for p in r.json().get("plans", []):
+                if p["name"] == "Premium Mensual $2":
+                    return p["id"]
+        prod_id = await _paypal_create_product()
+        if not prod_id:
+            raise HTTPException(503, "Error creando producto PayPal")
+        r2 = await client.post(
+            f"{PAYPAL_BASE}/v1/billing/plans",
+            json={
+                "product_id": prod_id,
+                "name": "Premium Mensual $2",
+                "description": "Acceso premium a todas las funcionalidades",
+                "billing_cycles": [{"frequency": {"interval_unit": "MONTH", "interval_count": 1}, "tenure_type": "REGULAR", "sequence": 1, "total_cycles": 0, "pricing_scheme": {"fixed_price": {"value": "2.00", "currency_code": "USD"}}}],
+                "payment_preferences": {"auto_bill_outstanding": True, "setup_fee_failure_action": "CONTINUE", "payment_failure_threshold": 3},
+            },
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+        )
+        r2.raise_for_status()
+        return r2.json()["id"]
+
+async def _paypal_verify_webhook(headers: dict, body: bytes) -> dict:
+    token = await _paypal_token()
+    async with httpx.AsyncClient() as client:
+        r = await client.post(
+            f"{PAYPAL_BASE}/v1/notifications/verify-webhook-signature",
+            json={
+                "auth_algo": headers.get("paypal-auth-algo", ""),
+                "cert_url": headers.get("paypal-cert-url", ""),
+                "transmission_id": headers.get("paypal-transmission-id", ""),
+                "transmission_sig": headers.get("paypal-transmission-sig", ""),
+                "transmission_time": headers.get("paypal-transmission-time", ""),
+                "webhook_id": PAYPAL_WEBHOOK_ID,
+                "webhook_event": json.loads(body),
+            },
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+        )
+        r.raise_for_status()
+        return r.json()
+
+@app.post("/api/subscription/create-checkout")
+async def create_checkout(user_email: str = Depends(get_user)):
+    if not PAYPAL_CLIENT_ID or not PAYPAL_CLIENT_SECRET:
+        raise HTTPException(503, "PayPal no está configurado. Contactá al administrador.")
+    async with aiosqlite.connect(DB_PATH) as db:
+        row = await db.execute_fetchall("SELECT id FROM users WHERE email=?", (user_email,))
+        if not row:
+            raise HTTPException(404, "Usuario no encontrado")
+        uid = row[0][0]
+    try:
+        plan_id = await _paypal_find_or_create_plan()
+        token = await _paypal_token()
+        return_url = "https://astrochino.onrender.com/?premium=success"
+        cancel_url = "https://astrochino.onrender.com/?premium=cancel"
+        async with httpx.AsyncClient() as client:
+            r = await client.post(
+                f"{PAYPAL_BASE}/v1/billing/subscriptions",
+                json={
+                    "plan_id": plan_id,
+                    "custom_id": str(uid),
+                    "application_context": {
+                        "brand_name": "AstroChino",
+                        "locale": "es-AR",
+                        "shipping_preference": "NO_SHIPPING",
+                        "user_action": "SUBSCRIBE_NOW",
+                        "payment_method": {"payer_selected": "PAYPAL", "payee_preferred": "IMMEDIATE_PAYMENT_REQUIRED"},
+                        "return_url": return_url,
+                        "cancel_url": cancel_url,
+                    },
+                    "subscriber": {"email_address": user_email},
+                },
+                headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json", "Accept": "application/json"},
+            )
+            r.raise_for_status()
+            sub = r.json()
+            approval_url = next((l["href"] for l in sub.get("links", []) if l["rel"] == "approve"), None)
+            if not approval_url:
+                raise HTTPException(500, "No se pudo obtener la URL de aprobación de PayPal")
+            async with aiosqlite.connect(DB_PATH) as db:
+                await db.execute("INSERT OR REPLACE INTO subscriptions (user_id, paypal_subscription_id, status) VALUES (?, ?, ?)", (uid, sub["id"], "pending"))
+                await db.commit()
+        return {"success": True, "url": approval_url}
+    except Exception as e:
+        raise HTTPException(500, f"Error al crear la suscripción en PayPal: {e}")
+
+@app.post("/api/webhook/paypal")
+async def paypal_webhook(request: Request):
+    if not PAYPAL_WEBHOOK_ID:
+        raise HTTPException(503, "Webhook PayPal no configurado")
+    payload = await request.body()
+    headers_dict = {k.lower(): v for k, v in request.headers.items()}
+    try:
+        verification = await _paypal_verify_webhook(headers_dict, payload)
+        if verification.get("verification_status") != "SUCCESS":
+            raise HTTPException(400, "Firma de webhook inválida")
+    except Exception as e:
+        raise HTTPException(400, f"Error verificando webhook: {e}")
+    event = json.loads(payload)
+    event_type = event.get("event_type", "")
+    resource = event.get("resource", {})
+    if event_type == "PAYMENT.SALE.COMPLETED":
+        sub_id = resource.get("billing_agreement_id") or resource.get("subscription_id", "")
+        if sub_id:
+            async with aiosqlite.connect(DB_PATH) as db:
+                cur = await db.execute("SELECT user_id FROM subscriptions WHERE paypal_subscription_id = ?", (sub_id,))
+                row = await cur.fetchone()
+                if row:
+                    await db.execute("UPDATE users SET premium = 1 WHERE id = ?", (row["user_id"],))
+                    await db.execute("UPDATE subscriptions SET status = 'active', current_period_start = datetime('now'), current_period_end = datetime('now', '+1 month') WHERE paypal_subscription_id = ?", (sub_id,))
+                    await db.commit()
+    elif event_type in ("BILLING.SUBSCRIPTION.CANCELLED", "BILLING.SUBSCRIPTION.EXPIRED"):
+        sub_id = resource.get("id", "")
+        if sub_id:
+            async with aiosqlite.connect(DB_PATH) as db:
+                cur = await db.execute("SELECT user_id FROM subscriptions WHERE paypal_subscription_id = ?", (sub_id,))
+                row = await cur.fetchone()
+                if row:
+                    await db.execute("UPDATE users SET premium = 0 WHERE id = ?", (row["user_id"],))
+                    await db.execute("UPDATE subscriptions SET status = 'canceled' WHERE paypal_subscription_id = ?", (sub_id,))
+                    await db.commit()
+    return {"success": True}
+
 
 if __name__ == "__main__":
     import uvicorn

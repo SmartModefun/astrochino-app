@@ -321,8 +321,8 @@ body {
 .horo-item:hover { border-color:var(--gold-dark); background: rgba(74,0,16,0.3); }
 .horo-item img { width:36px; height:36px; object-fit:cover; flex-shrink:0; }
 .horo-item .info { flex:1; min-width:0; }
-.horo-item .info .n { font-size:0.72rem; font-weight:600; color:var(--gold); }
-.horo-item .info .p { font-size:0.6rem; color:var(--silk-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.horo-item .info .n { font-size:0.82rem; font-weight:600; color:var(--gold); }
+.horo-item .info .p { font-size:0.7rem; color:var(--silk-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .horo-item .arrow { color:var(--gold-dark); opacity:0.3; font-size:0.9rem; }
 
 /* HOROSCOPE EXPANDED */
@@ -334,10 +334,10 @@ body {
 @keyframes fadeIn { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
 .horo-exp .top { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
 .horo-exp .top img { width:36px; height:36px; object-fit:cover; }
-.horo-exp .top .nn { font-weight:600; font-size:0.75rem; color:var(--gold); }
-.horo-exp .top .dd { font-size:0.55rem; color:var(--silk-dim); }
-.horo-exp .tx { font-size:0.7rem; line-height:1.7; color:var(--silk); }
-.horo-exp .lucky { font-size:0.6rem; color:var(--gold-dark); margin-top:8px; padding-top:8px; border-top:1px solid var(--card-border); }
+.horo-exp .top .nn { font-weight:600; font-size:0.85rem; color:var(--gold); }
+.horo-exp .top .dd { font-size:0.65rem; color:var(--silk-dim); }
+.horo-exp .tx { font-size:0.8rem; line-height:1.8; color:var(--silk); }
+.horo-exp .lucky { font-size:0.7rem; color:var(--gold-dark); margin-top:8px; padding-top:8px; border-top:1px solid var(--card-border); }
 
 /* MODAL - imperial plate */
 .modal {
@@ -448,6 +448,24 @@ body {
 ::-webkit-scrollbar-track { background:var(--carbon); }
 ::-webkit-scrollbar-thumb { background:var(--red-imperial); }
 
+/* Print styles */
+@media print {
+  * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  body { background:#fff !important; color:#000 !important; }
+  .bg, .bottom-nav, .header, .footer, .calc-card, .animal-grid, .dashboard-grid, .tabs, .horo-list, .horo-item, .horo-exp, .compat-card, .compat-result, .account-card, .profile-card, .divider, .section-title, .section-sub, .hero, .sec, .content, .modal, .modal-close, .calc-btn, #cres, #cr, #as, #ps { display:none !important; }
+  body > * { display:none !important; }
+  #cnm { display:block !important; position:static !important; background:none !important; backdrop-filter:none !important; }
+  #cnm .modal-content { display:block !important; border:1px solid #ccc !important; box-shadow:none !important; max-width:100% !important; background:#fff !important; margin:0 auto; }
+  #cnm .modal-body { padding:10px 20px !important; }
+  #cnp { color:#000 !important; }
+  #cnp .cy { color:#333 !important; border-color:#999 !important; background:#f0f0f0 !important; }
+  #cnp h2 { color:#7A0019 !important; }
+  #cnp h3 { color:#7A0019 !important; }
+  #cnp p { color:#333 !important; }
+  #cnmExtra div[style*="border"] { border-color:#ddd !important; }
+  #cnmExtra { color:#333 !important; }
+}
+
 /* RESPONSIVE */
 @media(max-width:700px) {
   .animal-grid { grid-template-columns:repeat(3,1fr); }
@@ -488,10 +506,10 @@ body {
     </div>
   </div>
   <div class="header-nav">
-    <button class="active" onclick="st('th')">Inicio</button>
-    <button onclick="st('ts')">Signos</button>
-    <button onclick="st('tc')">Compatibilidad</button>
-    <button onclick="st('tu')">Cuenta</button>
+    <button class="active" data-tab="th">Inicio</button>
+    <button data-tab="ts">Signos</button>
+    <button data-tab="tc">Compatibilidad</button>
+    <button data-tab="tu">Cuenta</button>
   </div>
 </div>
 
@@ -609,7 +627,7 @@ body {
 <div class="bottom-nav">
   <button class="active" data-tab="th"><i class="fas fa-meteor"></i> Inicio</button>
   <button data-tab="ts"><i class="fas fa-dragon"></i> Signos</button>
-  <button data-tab="tc"><i class="fas fa-yin-yang"></i> Compat</button>
+  <button data-tab="tc"><i class="fas fa-yin-yang"></i> Compatibilidad</button>
   <button data-tab="tu"><i class="fas fa-user"></i> Cuenta</button>
 </div>
 
@@ -630,7 +648,94 @@ body {
   </div>
 </div>
 
+<!-- INFO MODAL -->
+<div class="modal" id="im">
+  <div class="modal-content" style="max-width:550px;">
+    <button class="modal-close" onclick="cim()">X</button>
+    <div class="modal-body" id="imb"></div>
+  </div>
+</div>
+
+<!-- CARTA NATAL MODAL -->
+<div class="modal" id="cnm">
+  <div class="modal-content" style="max-width:560px;">
+    <button class="modal-close" onclick="document.getElementById('cnm').classList.remove('open')">X</button>
+    <div class="modal-body" id="cnb">
+      <div id="cnp"></div>
+      <button class="calc-btn" onclick="window.print()" style="margin-top:16px;">Imprimir / PDF</button>
+    </div>
+  </div>
+</div>
+
 <script>
+const ELEMENTS = [
+  {n:'Madera',ic:'fa-tree',c:'#4CAF50',se:'Primavera',di:'Este',pl:'J\u00fapiter',co:'Verde',an:'Tigre, Conejo, Drag\u00f3n',pers:'Crecimiento, expansi\u00f3n, creatividad, generosidad. Los nacidos bajo Madera son visionarios, idealistas y luchadores natos.'},
+  {n:'Fuego',ic:'fa-fire',c:'#E53935',se:'Verano',di:'Sur',pl:'Marte',co:'Rojo',an:'Serpiente, Caballo, Cabra',pers:'Pasi\u00f3n, energ\u00eda, transformaci\u00f3n, carisma. Los de Fuego son l\u00edderes natos, magn\u00e9ticos e intensos.'},
+  {n:'Tierra',ic:'fa-mountain',c:'#FFB300',se:'Final del Verano',di:'Centro',pl:'Saturno',co:'Amarillo',an:'Rata, Buey',pers:'Estabilidad, nutrici\u00f3n, equilibrio, confiabilidad. Los de Tierra son pr\u00e1cticos, leales y de mente s\u00f3lida.'},
+  {n:'Metal',ic:'fa-gem',c:'#BDBDBD',se:'Oto\u00f1o',di:'Oeste',pl:'Venus',co:'Blanco',an:'Mono, Gallo, Perro',pers:'Determinaci\u00f3n, estructura, disciplina, justicia. Los de Metal son ambiciosos, resilientes y de voluntad fuerte.'},
+  {n:'Agua',ic:'fa-water',c:'#42A5F5',se:'Invierno',di:'Norte',pl:'Mercurio',co:'Negro',an:'Cerdo, Rata',pers:'Sabidur\u00eda, adaptabilidad, intuici\u00f3n, profundidad. Los de Agua son fil\u00f3sofos natos, flexibles y misteriosos.'},
+];
+const CYCLES_DATA = [
+  {n:'El Ciclo de 60 A\u00f1os',desc:'El calendario chino combina 10 Troncos Celestiales (5 Elementos en Yin/Yang) con 12 Ramas Terrenales (Animales), formando un ciclo de 60 combinaciones \u00fanicas. Cada a\u00f1o tiene una energ\u00eda distinta.',ic:'fa-sync'},
+  {n:'2026 \u2014 Caballo de Fuego',desc:'A\u00f1o 4724 del calendario chino. Combina el Tronco Celestial Bing (\u4e19, Fuego Yang) con la Rama Terrenal Wu (\u5348, Caballo). Un a\u00f1o de acci\u00f3n, pasi\u00f3n y cambios radicales.',ic:'fa-horse'},
+  {n:'Pr\u00f3ximos Ciclos',desc:'2027: Cabra de Fuego \u2022 2028: Mono de Tierra \u2022 2029: Gallo de Tierra \u2022 2030: Perro de Metal \u2022 2031: Cerdo de Metal \u2022 2032: Rata de Agua \u2022 2033: Buey de Agua \u2022 2034: Tigre de Madera \u2022 2035: Conejo de Madera',ic:'fa-calendar-alt'},
+  {n:'Tu Ciclo Personal',desc:'Cada 12 a\u00f1os vuelve tu animal, pero con un elemento diferente. Cada 60 a\u00f1os se repite exactamente tu combinaci\u00f3n animal-elemento. Es el Gran Retorno celestial.',ic:'fa-star'},
+];
+// Full animal data for Carta Natal
+const ANIMAL_FULL = [
+  {n:'Rata',alt:'—',myth:'El Emperador de Jade convoc\u00f3 a todos los animales para una gran carrera. La Rata, astuta y peque\u00f1a, sab\u00eda que no podr\u00eda vencer a los grandes nadadores. Pidi\u00f3 ayuda al Buey y \u00e9ste, bondadoso, la llev\u00f3 sobre su lomo. Justo al llegar a la meta, la Rata salt\u00f3 y cruz\u00f3 primero, ganando el primer lugar del zod\u00edaco.',desc:'La Rata es la estratega del zod\u00edaco chino. Su inteligencia no es solo aguda: es quir\u00fargica. Donde otros ven un obst\u00e1culo, la Rata ve una oportunidad. El mito de la Gran Carrera la retrata como astuta, pero hay m\u00e1s: tuvo la humildad de pedir ayuda y la visi\u00f3n para actuar en el momento preciso. Los nacidos bajo este signo son encantadores, carism\u00e1ticos y poseen una memoria prodigiosa. Su capacidad para leer situaciones y personas es casi sobrenatural. Su mayor desaf\u00edo es aprender a confiar: su mente siempre est\u00e1 dos pasos adelante, lo que a veces la vuelve ansiosa. En el amor son entregados y protectores, pero necesitan estimulaci\u00f3n intelectual constante. Su elemento potencia su astucia: la Rata de Metal es implacable, la de Agua es diplom\u00e1tica, la de Madera es creativa, la de Fuego es apasionada y la de Tierra es estable.'},
+  {n:'Buey',alt:'B\u00fafalo, Toro',myth:'Segundo en la gran carrera, el Buey es recordado por su fuerza y bondad. Dej\u00f3 que la Rata viajara sobre su lomo sin saber que ella le arrebatar\u00eda el primer puesto. El Buey no se quej\u00f3; acept\u00f3 su destino con estoicismo.',desc:'El Buey es la roca del zod\u00edaco. No hay prisas, no hay atajos: solo trabajo constante, disciplina inquebrantable y una lealtad que mueve monta\u00f1as. Lleg\u00f3 segundo en la Gran Carrera porque dio su confianza a la Rata, pero nunca lo lament\u00f3. Su fuerza no es solo f\u00edsica: es espiritual. Los nacidos bajo el signo del Buey son pacientes, met\u00f3dicos y extraordinariamente confiables. Cuando un Buey promete algo, puedes llevarlo al banco. Son reservados, pero su silencio es el de la monta\u00f1a: imponente, sereno, lleno de sabidur\u00eda. En el amor son posesivos pero devotos; construyen relaciones como construyen su vida: ladrillo por ladrillo, con la certeza del que sabe que lo s\u00f3lido perdura. El Buey de Tierra es la m\u00e1xima expresi\u00f3n de estabilidad, mientras que el de Fuego encuentra una determinaci\u00f3n ardiente.'},
+  {n:'Tigre',alt:'—',myth:'El Tigre luch\u00f3 con todas sus fuerzas contra las corrientes del gran r\u00edo. Su poder y valent\u00eda le permitieron llegar tercero. Cuenta la leyenda que recibi\u00f3 del Emperador de Jade el don del coraje y la protecci\u00f3n contra los tres males.',desc:'El Tigre es el \u00fanico animal del zod\u00edaco que camina solo. No sigue manadas, no pide permiso, no espera instrucciones. En la mitolog\u00eda china es el rey de todas las criaturas terrestres, y los nacidos bajo este signo heredan su esp\u00edritu indomable. Son l\u00edderes natos, carism\u00e1ticos y magn\u00e9ticos, pero tambi\u00e9n impulsivos y rebeldes. El Tigre necesita libertad como el aire que respira; cualquier jaula, por dorada que sea, lo marchita. En el amor son intensos, apasionados y protectores, pero pueden ser territoriales. Su mayor virtud es el coraje: un Tigre no huye de nada, ni siquiera de sus propios miedos. El Tigre de Madera es el m\u00e1s idealista; el de Fuego, el m\u00e1s apasionado; el de Tierra, el m\u00e1s equilibrado; el de Metal, el m\u00e1s decidido; el de Agua, el m\u00e1s intuitivo.'},
+  {n:'Conejo',alt:'Liebre, Gato (Vietnam)',myth:'El Conejo cruz\u00f3 el r\u00edo saltando de piedra en piedra y flotando sobre un tronco. Casi pierde su lugar cuando el Drag\u00f3n lleg\u00f3 con vientos y lluvias, pero se aferr\u00f3 y lleg\u00f3 cuarto. En el zod\u00edaco vietnamita es reemplazado por el Gato.',desc:'El Conejo es la elegancia personificada. En la mitolog\u00eda china vive en la Luna, junto al \u00e1rbol de la inmortalidad, preparando el elixir de la vida. Los nacidos bajo este signo poseen una gracia natural que atrae a los dem\u00e1s sin esfuerzo. Son diplom\u00e1ticos, discretos y poseen un refinamiento innato. El Conejo detesta el conflicto y har\u00e1 cualquier cosa por mantener la armon\u00eda, pero esta misma cualidad puede llevarlo a evitar confrontaciones necesarias. En el amor son rom\u00e1nticos empedernidos, buscando la seguridad y la paz. Su intuici\u00f3n es tan aguda que a veces parece leer la mente. En algunas tradiciones se le llama Liebre; en el zod\u00edaco vietnamita, es el Gato. El Conejo de Agua es m\u00e1s intuitivo; el de Fuego, m\u00e1s apasionado; el de Tierra, m\u00e1s estable.'},
+  {n:'Drag\u00f3n',alt:'—',myth:'El \u00fanico animal mitol\u00f3gico del zod\u00edaco. Podr\u00eda haber ganado la carrera, pero se detuvo para ayudar a los aldeanos creando lluvia y ayud\u00f3 al Conejo a cruzar. Lleg\u00f3 quinto, pero su nobleza lo convirti\u00f3 en el m\u00e1s venerado.',desc:'El Drag\u00f3n es la criatura m\u00e1s poderosa y venerada de la mitolog\u00eda china. \u00danico animal mitol\u00f3gico del zod\u00edaco, representa el poder imperial, la buena fortuna y la autoridad celestial. Los nacidos bajo este signo nacen con una estrella: son carism\u00e1ticos, ambiciosos y magn\u00e9ticos. Donde sea que un Drag\u00f3n entra, la habitaci\u00f3n se ilumina. Su energ\u00eda es contagiosa y su confianza, inspiradora. Sin embargo, su mayor desaf\u00edo es el orgullo: el Drag\u00f3n puede ser arrogante e impaciente con quienes no comparten su visi\u00f3n. En el amor son apasionados y generosos, pero necesitan admiraci\u00f3n. El Drag\u00f3n de Fuego es el m\u00e1s intenso; el de Agua, el m\u00e1s sabio; el de Tierra, el m\u00e1s equilibrado; el de Metal, el m\u00e1s ambicioso; el de Madera, el m\u00e1s creativo.'},
+  {n:'Serpiente',alt:'—',myth:'La Serpiente se escondi\u00f3 entre la crin del Drag\u00f3n durante la carrera y se desliz\u00f3 sigilosamente al llegar a la meta. El Caballo, al verla, dio un respingo y perdi\u00f3 el sexto lugar.',desc:'La Serpiente es el enigma del zod\u00edaco. Silenciosa, observadora, profundamente intuitiva. Donde los dem\u00e1s hablan, ella escucha; donde los dem\u00e1s act\u00faan, ella espera el momento perfecto. En la cultura china, la Serpiente es s\u00edmbolo de sabidur\u00eda oculta y renovaci\u00f3n, por su capacidad de mudar la piel. Los nacidos bajo este signo poseen una inteligencia penetrante y una elegancia magn\u00e9tica. Son fil\u00f3sofos natos, con una profundidad que pocos pueden alcanzar. Pero su misterio tiene un precio: pueden ser reservados, desconfiados y, a veces, vengativos. En el amor son apasionados y leales, pero necesitan espacio y misterio. La Serpiente de Agua es la m\u00e1s intuitiva; la de Fuego, la m\u00e1s apasionada; la de Tierra, la m\u00e1s estable; la de Metal, la m\u00e1s decidida; la de Madera, la m\u00e1s creativa.'},
+  {n:'Caballo',alt:'—',myth:'El Caballo galop\u00f3 velozmente y estaba por llegar sexto, pero la Serpiente apareci\u00f3 de la nada asust\u00e1ndolo y haci\u00e9ndolo perder un lugar. Lleg\u00f3 s\u00e9ptimo. S\u00edmbolo de libertad, energ\u00eda y esp\u00edritu indomable.',desc:'El Caballo es pura energ\u00eda en movimiento. En la cultura china representa la velocidad, la perseverancia y el esp\u00edritu indomable. Los nacidos bajo este signo son aventureros, independientes y rebosantes de vitalidad. Necesitan movimiento como el aire que respiran: viajar, explorar, descubrir. Una vida sedentaria es una vida a medias para el Caballo. Son excelentes comunicadores, con una facilidad natural para conectar con los dem\u00e1s. En el amor son apasionados pero inquietos; necesitan una pareja que entienda su necesidad de libertad. El 2026 es el A\u00f1o del Caballo de Fuego, una combinaci\u00f3n particularmente poderosa que promete transformaci\u00f3n y acci\u00f3n imparable. El Caballo de Fuego es el m\u00e1s intenso; el de Tierra, el m\u00e1s equilibrado; el de Metal, el m\u00e1s resistente.'},
+  {n:'Cabra',alt:'Oveja, Carnero',myth:'La Cabra, el Mono y el Gallo formaron un equipo para cruzar el r\u00edo. El Gallo encontr\u00f3 una balsa, el Mono la gui\u00f3 entre las rocas y la Cabra mantuvo el equilibrio y la direcci\u00f3n. Llegaron juntos y la Cabra fue colocada octava.',desc:'La Cabra es el alma art\u00edstica del zod\u00edaco. Tambi\u00e9n conocida como Oveja o Carnero, representa la creatividad, la sensibilidad y la conexi\u00f3n con la belleza. Los nacidos bajo este signo poseen un mundo interior rico y complejo, una imaginaci\u00f3n sin l\u00edmites y una sensibilidad que los hace intuir lo que otros no ven. Son pac\u00edficos, elegantes y profundamente emp\u00e1ticos. Sin embargo, su sensibilidad es una espada de doble filo: los hace vulnerables a la cr\u00edtica y propensos a la ansiedad. En el amor son rom\u00e1nticos ideales, buscando una conexi\u00f3n de almas. Necesitan seguridad emocional para florecer. La Cabra de Tierra es la m\u00e1s estable; la de Fuego, la m\u00e1s apasionada; la de Agua, la m\u00e1s intuitiva; la de Madera, la m\u00e1s creativa; la de Metal, la m\u00e1s refinada.'},
+  {n:'Mono',alt:'—',myth:'El Mono, ingenioso y \u00e1gil, ayud\u00f3 a la Cabra y al Gallo a cruzar el r\u00edo en su balsa. Mientras el Gallo busc\u00f3 la madera y la Cabra mantuvo el rumbo, el Mono saltaba apartando obst\u00e1culos. Lleg\u00f3 noveno.',desc:'El Mono es el genio travieso del zod\u00edaco. R\u00e1pido, ingenioso, creativo y con un sentido del humor que desarma a cualquiera. Sun Wukong, el Rey Mono, es uno de los personajes m\u00e1s famosos de la literatura china, y captura perfectamente la esencia de este signo: inteligencia sin l\u00edmites, curiosidad insaciable y una rebeld\u00eda encantadora. Los nacidos bajo el signo del Mono son solucionadores de problemas natos. Su mente trabaja a una velocidad que asombra y agota a partes iguales. Son vers\u00e1tiles, aprenden r\u00e1pido y pueden tener \u00e9xito en casi cualquier cosa que se propongan. Su mayor desaf\u00edo es la consistencia: se aburren f\u00e1cilmente. En el amor son divertidos, carism\u00e1ticos, pero pueden ser juguetones en exceso. El Mono de Metal es el m\u00e1s ambicioso; el de Agua, el m\u00e1s adaptable.'},
+  {n:'Gallo',alt:'—',myth:'El Gallo encontr\u00f3 la balsa que transport\u00f3 al tr\u00edo a trav\u00e9s del r\u00edo. Con su aguda visi\u00f3n divis\u00f3 los troncos flotantes y organiz\u00f3 la construcci\u00f3n. Cada ma\u00f1ana saluda al sol protector contra los malos esp\u00edritus.',desc:'El Gallo es la conciencia del zod\u00edaco. En la cultura china, su canto matinal ahuyenta a los malos esp\u00edritus y anuncia un nuevo comienzo. Los nacidos bajo este signo son puntuales, observadores y extraordinariamente organizados. Poseen un ojo cl\u00ednico para los detalles que a otros se les escapan. Son honestos hasta la crudeza: un Gallo nunca te dir\u00e1 lo que quieres escuchar, sino la verdad. Esta misma honestidad los convierte en amigos leales y aliados invaluables. En el amor son tradicionales y rom\u00e1nticos, pero exigentes. Su mayor virtud es la confiabilidad; su mayor desaf\u00edo, aprender a ser flexible. El Gallo de Metal es el m\u00e1s estridente; el de Agua, el m\u00e1s comunicativo; el de Tierra, el m\u00e1s estable; el de Fuego, el m\u00e1s apasionado; el de Madera, el m\u00e1s idealista.'},
+  {n:'Perro',alt:'—',myth:'El Perro, a pesar de ser excelente nadador, perdi\u00f3 tiempo jugando y oliendo flores durante la carrera. Lleg\u00f3 und\u00e9cimo. No le import\u00f3 perder posiciones porque disfrut\u00f3 el viaje.',desc:'El Perro es el coraz\u00f3n del zod\u00edaco. Leal, honesto, protector y con un sentido de la justicia que lo define. En la cultura china, el Perro es s\u00edmbolo de fidelidad y buena fortuna. Los nacidos bajo este signo son amigos incondicionales, compa\u00f1eros leales y defensores de los que no pueden defenderse solos. Tienen un radar innato para detectar la injusticia y no dudan en actuar. Son trabajadores incansables cuando creen en una causa, pero pueden ser pesimistas y preocupones. En el amor son devotos y entregados, pero necesitan sentirse seguros. Su mayor virtud es la lealtad; su mayor desaf\u00edo, aprender a soltar el control. El Perro de Tierra es el m\u00e1s equilibrado; el de Fuego, el m\u00e1s apasionado; el de Metal, el m\u00e1s protector.'},
+  {n:'Cerdo',alt:'Jabal\u00ed',myth:'El Cerdo comenz\u00f3 la carrera con entusiasmo, pero pronto sinti\u00f3 hambre, se detuvo a comer y se qued\u00f3 dormido. Despert\u00f3 justo a tiempo para cruzar la meta en \u00faltimo lugar. No le import\u00f3; disfrut\u00f3 cada momento.',desc:'El Cerdo es la abundancia personificada. En la cultura china, el Cerdo es s\u00edmbolo de riqueza, prosperidad y buena fortuna. Los nacidos bajo este signo son honestos, generosos y poseen una capacidad innata para disfrutar la vida. Mientras otros corren ansiosos tras el \u00e9xito, el Cerdo sabe detenerse a oler las flores. Son leales hasta el extremo, confiados y de coraz\u00f3n puro. Su naturaleza optimista atrae a los dem\u00e1s como un im\u00e1n. En el amor son rom\u00e1nticos, generosos y entregados, pero pueden ser ingenuos. Su mayor virtud es la autenticidad; su mayor desaf\u00edo, aprender a decir que no. El Cerdo de Agua es el m\u00e1s intuitivo; el de Tierra, el m\u00e1s estable; el de Fuego, el m\u00e1s apasionado; el de Madera, el m\u00e1s generoso; el de Metal, el m\u00e1s decidido.'},
+];
+const ELEM_NAMES = ['Madera','Fuego','Tierra','Metal','Agua'];
+const ELEM_COLORS = ['#4CAF50','#E53935','#FFB300','#BDBDBD','#42A5F5'];
+function calcElement(year) {
+  const stem = (year - 4) % 10;
+  if (stem < 0) return { elem: ELEM_NAMES[0], polarity: 'Yang', color: ELEM_COLORS[0] };
+  return { elem: ELEM_NAMES[Math.floor(stem / 2)], polarity: stem % 2 === 0 ? 'Yang' : 'Yin', color: ELEM_COLORS[Math.floor(stem / 2)] };
+}
+function getYearsWithElements(animalIdx) {
+  const base = 2020 + animalIdx;
+  const res = [];
+  for (let yr = base + 12; yr <= 2044; yr += 12) res.push({ year: yr, ...calcElement(yr) });
+  for (let yr = base; yr >= 1900; yr -= 12) res.push({ year: yr, ...calcElement(yr) });
+  return res.sort((a, b) => b.year - a.year);
+}
+function oi(t) {
+  const m=document.getElementById('im'), b=document.getElementById('imb');
+  m.classList.add('open');
+  if (t==='elements') {
+    b.innerHTML = '<h2 style="font-family:Kunaroh,serif;font-size:1.2rem;color:var(--gold);margin-bottom:16px;letter-spacing:3px;">Los Cinco Elementos</h2>'+
+      ELEMENTS.map(e => '<div style="border:1px solid var(--card-border);padding:14px;margin-bottom:8px;">'+
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">'+
+        '<i class="fas '+e.ic+'" style="font-size:1.2rem;color:'+e.c+';"></i>'+
+        '<h3 style="font-family:Kunaroh,serif;font-size:0.9rem;color:'+e.c+';letter-spacing:2px;">'+e.n+'</h3>'+
+        '<span style="margin-left:auto;font-size:0.55rem;color:var(--silk-dim);letter-spacing:1px;">'+e.an+'</span></div>'+
+        '<p style="font-size:0.7rem;color:var(--silk);line-height:1.6;margin-bottom:4px;">'+e.pers+'</p>'+
+        '<div style="font-size:0.6rem;color:var(--gold-dark);"><span>Estaci\u00f3n: '+e.se+'</span> <span style="margin:0 8px;">|</span> <span>Direcci\u00f3n: '+e.di+'</span> <span style="margin:0 8px;">|</span> <span>Color: '+e.co+'</span></div>'+
+        '</div>'
+      ).join('');
+  } else {
+    b.innerHTML = '<h2 style="font-family:Kunaroh,serif;font-size:1.2rem;color:var(--gold);margin-bottom:16px;letter-spacing:3px;">Ciclos Energ\u00e9ticos</h2>'+
+      CYCLES_DATA.map(c => '<div style="border:1px solid var(--card-border);padding:14px;margin-bottom:8px;">'+
+        '<div style="display:flex;align-items:center;gap:10px;">'+
+        '<i class="fas '+c.ic+'" style="font-size:1.2rem;color:var(--gold);"></i>'+
+        '<h3 style="font-family:Kunaroh,serif;font-size:0.85rem;color:var(--gold);letter-spacing:1px;">'+c.n+'</h3></div>'+
+        '<p style="font-size:0.7rem;color:var(--silk);line-height:1.6;margin-top:6px;">'+c.desc+'</p></div>'
+      ).join('');
+  }
+}
+function cim() { document.getElementById('im').classList.remove('open'); }
+document.getElementById('im').addEventListener('click', function(e) { if(e.target===this) cim(); });
 const A = 'Rata,Buey,Tigre,Conejo,Drag\u00f3n,Serpiente,Caballo,Cabra,Mono,Gallo,Perro,Cerdo'.split(',');
 const AI = A.map(a => 'static/images/'+a+'.jpg');
 const YRS = A.map((_,i) => { const b=2020+i, y=[]; for(let yr=b;yr>=1900;yr-=12) y.push(yr); for(let yr=b+12;yr<=2040;yr+=12) y.push(yr); return y.sort((a,b)=>b-a); });
@@ -662,7 +767,7 @@ function st(t) {
   if (t==='ts') gs();
   if (t==='tu' && tk) fp();
 }
-document.querySelectorAll('.bottom-nav button, .header-nav button').forEach(b => b.addEventListener('click', ()=>st(b.dataset.tab)));
+document.querySelectorAll('.bottom-nav button, .header-nav button').forEach(b => b.addEventListener('click', function() { if (this.dataset.tab) st(this.dataset.tab); }));
 
 function ta(l) { document.getElementById('rf').style.display=l?'none':'block'; document.getElementById('lf').style.display=l?'block':'none'; }
 
@@ -682,10 +787,18 @@ function gs() {
   }).catch(()=>{});
 }
 
-// Dashboard
+// Dashboard - clickable actions
+window.DA = [
+  function() { st('th'); document.querySelector('.calc-card').scrollIntoView({behavior:'smooth',block:'center'}); document.querySelector('.calc-card').style.borderColor='var(--gold)'; setTimeout(()=>document.querySelector('.calc-card').style.borderColor='',1500); },
+  function() { st('th'); lh('today'); setTimeout(()=>document.getElementById('hl').scrollIntoView({behavior:'smooth',block:'center'}),300); },
+  function() { st('th'); lh('weekly'); setTimeout(()=>document.getElementById('hl').scrollIntoView({behavior:'smooth',block:'center'}),300); },
+  function() { st('tc'); },
+  function() { oi('elements'); },
+  function() { oi('cycles'); },
+];
 (function() {
-  document.getElementById('dg').innerHTML = DASHBOARD.map(d =>
-    '<div class="dash-card"><div class="icon"><i class="fas '+d.icon+'"></i></div><h4>'+d.name+'</h4><p>'+d.desc+'</p></div>'
+  document.getElementById('dg').innerHTML = DASHBOARD.map((d,i) =>
+    '<div class="dash-card" onclick="DA['+i+']()"><div class="icon"><i class="fas '+d.icon+'"></i></div><h4>'+d.name+'</h4><p>'+d.desc+'</p></div>'
   ).join('');
 })();
 
@@ -721,8 +834,83 @@ async function cs() {
     const el = document.getElementById('cr');
     el.innerHTML = '<img src="'+AI[r.animal.id]+'"><div class="info"><h3>'+r.animal.name+'</h3><p>'+r.element+' &middot; '+r.animal.polarity+'</p></div>';
     el.classList.add('show');
+    showCarta(r.animal.id, y);
   } catch(e) { document.getElementById('cr').innerHTML = '<p style="color:var(--red-imperial);font-size:0.65rem;">Error</p>'; document.getElementById('cr').classList.add('show'); }
 }
+
+function showCarta(idx, birthYear) {
+  const a = ANIMAL_FULL[idx];
+  const e = calcElement(birthYear);
+  const years = getYearsWithElements(idx);
+  const m = document.getElementById('cnm');
+  const p = document.getElementById('cnp');
+  p.innerHTML =
+    '<div style="border-bottom:1px solid var(--card-border);padding-bottom:12px;margin-bottom:12px;">'+
+      '<div style="display:flex;align-items:center;gap:14px;">'+
+        '<img src="'+AI[idx]+'" style="width:72px;height:72px;object-fit:cover;border:1px solid var(--gold-dark);flex-shrink:0;">'+
+        '<div>'+
+          '<h2 style="font-family:Kunaroh,serif;font-size:1.3rem;color:var(--gold);letter-spacing:3px;">'+A[idx]+'</h2>'+
+          (a.alt !== '\u2014' ? '<div style="font-size:0.6rem;color:var(--gold-dark);letter-spacing:1px;margin-top:2px;">Tambi\u00e9n conocido como: '+a.alt+'</div>' : '')+
+          '<div style="font-size:0.65rem;color:var(--silk-dim);margin-top:4px;letter-spacing:1px;">Naciste en <span style="color:var(--gold);">'+birthYear+'</span> \u2014 '+
+          '<span style="color:'+e.color+';">'+e.elem+' ('+e.polarity+')</span></div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="border:1px solid var(--card-border);padding:12px;margin-bottom:10px;">'+
+      '<h3 style="font-family:Kunaroh,serif;font-size:0.8rem;color:var(--gold);letter-spacing:2px;margin-bottom:4px;">La Leyenda</h3>'+
+      '<p style="font-size:0.72rem;color:var(--silk);line-height:1.7;">'+a.myth+'</p>'+
+    '</div>'+
+    '<div style="margin-bottom:10px;">'+
+      '<h3 style="font-family:Kunaroh,serif;font-size:0.8rem;color:var(--gold);letter-spacing:2px;margin-bottom:6px;">A\u00f1os con su Elemento</h3>'+
+      '<div class="years">'+years.slice(0,14).map(y =>
+        '<span class="y cy" style="'+(y.year===birthYear?'border-color:'+e.color+';color:'+e.color+';background:rgba(0,0,0,0.3);':'')+'">'+y.year+' <span style="font-size:0.5rem;opacity:0.7;">'+y.elem+'</span></span>'
+      ).join('')+'</div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">'+
+      '<div style="border:1px solid var(--card-border);padding:10px;text-align:center;">'+
+        '<div style="font-size:0.55rem;color:var(--gold-dark);letter-spacing:1px;">ELEMENTO</div>'+
+        '<div style="font-size:0.75rem;color:'+e.color+';font-weight:600;margin-top:2px;">'+e.elem+'</div>'+
+      '</div>'+
+      '<div style="border:1px solid var(--card-border);padding:10px;text-align:center;">'+
+        '<div style="font-size:0.55rem;color:var(--gold-dark);letter-spacing:1px;">POLARIDAD</div>'+
+        '<div style="font-size:0.75rem;color:var(--gold);font-weight:600;margin-top:2px;">'+e.polarity+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div id="cnmExtra" style="border:1px solid var(--card-border);padding:14px;margin-bottom:10px;text-align:left;font-size:0.7rem;color:var(--silk-dim);">Cargando informaci\u00f3n detallada...</div>'+
+    '<div style="border:1px solid var(--card-border);padding:14px;margin-bottom:10px;">'+
+      '<h3 style="font-family:Kunaroh,serif;font-size:0.8rem;color:var(--gold);letter-spacing:2px;margin-bottom:6px;">Su Personalidad</h3>'+
+      '<p style="font-size:0.75rem;color:var(--silk);line-height:1.8;">'+a.desc+'</p>'+
+    '</div>';
+  m.classList.add('open');
+  ap('/animal/'+A[idx]).then(d => {
+    document.getElementById('cnmExtra').innerHTML =
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">'+
+        '<div style="border:1px solid var(--card-border);padding:10px;text-align:center;">'+
+          '<div style="font-size:0.5rem;color:var(--gold-dark);letter-spacing:1px;">N\u00daMEROS DE SUERTE</div>'+
+          '<div style="font-size:0.75rem;color:var(--gold);margin-top:2px;">'+(d.lucky?.numeros?.join(', ')||'-')+'</div>'+
+        '</div>'+
+        '<div style="border:1px solid var(--card-border);padding:10px;text-align:center;">'+
+          '<div style="font-size:0.5rem;color:var(--gold-dark);letter-spacing:1px;">COLORES</div>'+
+          '<div style="font-size:0.75rem;color:var(--gold);margin-top:2px;">'+(d.lucky?.colores?.join(', ')||'-')+'</div>'+
+        '</div>'+
+        '<div style="border:1px solid var(--card-border);padding:10px;text-align:center;">'+
+          '<div style="font-size:0.5rem;color:var(--gold-dark);letter-spacing:1px;">DIRECCI\u00d3N</div>'+
+          '<div style="font-size:0.75rem;color:var(--gold);margin-top:2px;">'+(d.lucky?.direccion||'-')+'</div>'+
+        '</div>'+
+        '<div style="border:1px solid var(--card-border);padding:10px;text-align:center;">'+
+          '<div style="font-size:0.5rem;color:var(--gold-dark);letter-spacing:1px;">PIEDRAS</div>'+
+          '<div style="font-size:0.75rem;color:var(--gold);margin-top:2px;">'+(ST[A[idx]]?.join(', ')||'-')+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="padding-top:6px;border-top:1px solid var(--card-border);">'+
+        '<div style="font-size:0.55rem;color:var(--gold-dark);letter-spacing:1px;margin-bottom:2px;">COMPATIBILIDAD</div>'+
+        '<div style="font-size:0.75rem;color:var(--silk);line-height:1.6;">'+(CB[A[idx]]||'')+'</div>'+
+      '</div>';
+  }).catch(() => {
+    document.getElementById('cnmExtra').innerHTML = '<p style="font-size:0.65rem;color:var(--silk-dim);">Informaci\u00f3n no disponible</p>';
+  });
+}
+document.getElementById('cnm').addEventListener('click', function(e) { if(e.target===this) this.classList.remove('open'); });
 
 // Horo
 async function lh(pr) {
@@ -807,14 +995,36 @@ async function fp() {
     document.getElementById('ps2').textContent = (d.user.signo||d.user.animal)+' &middot; A\u00f1o '+d.user.birth_year;
     if (d.user.premium) {
       document.getElementById('pp').innerHTML='<span class="premium-badge">PREMIUM</span>';
-      document.getElementById('prs').innerHTML='';
+      document.getElementById('prs').innerHTML='<button class="calc-btn" onclick="manageSubscription()">Gestionar Suscripci\u00f3n</button>';
     } else {
       document.getElementById('pp').innerHTML='<span style="font-size:0.6rem;color:var(--silk-dim);">Gratuito</span>';
-      document.getElementById('prs').innerHTML='<button class="calc-btn" onclick="alert(\'Pr\u00f3ximamente\')" style="margin-top:4px;">Premium $2/mes</button>';
+      document.getElementById('prs').innerHTML='<button class="calc-btn" onclick="upgradePremium()" style="margin-top:4px;">Premium $2/mes</button>';
     }
   } catch(e) { lo(); }
 }
 function lo() { tk=null; localStorage.removeItem('token'); document.getElementById('as').style.display='block'; document.getElementById('ps').style.display='none'; }
+async function upgradePremium() {
+  const btn = document.querySelector('#prs .calc-btn');
+  btn.textContent='Conectando con PayPal...'; btn.disabled=true;
+  try {
+    const d = await ap('/subscription/create-checkout', {method:'POST'});
+    if (d.url) { window.open(d.url, '_blank'); }
+    else { alert('Error: No se pudo generar el link de pago'); }
+  } catch(e) {
+    if (e.message.includes('no configurado')) {
+      if (!confirm('El pago online no est\u00e1 disponible en este momento. Pod\u00e9s abonar por transferencia bancaria. Ver instructivo?')) return;
+      alert('AstroChino Premium\n\nTransferencia bancaria:\nBanco: Mercado Pago\nAlias: astrochino.mp\nTitular: Alejandro Quiroga\n\nMonto: $2 USD (o equivalente en ARS)\n\nLuego env\u00edanos el comprobante a:\npremium@astrochino.com\ncon tu email de registro.');
+    } else { alert('Error: '+e.message); }
+  }
+  btn.textContent='Premium $2/mes'; btn.disabled=false;
+}
+async function manageSubscription() {
+  try {
+    const d = await ap('/profile');
+    if (!d.user.premium) { await fp(); return; }
+    window.open('https://www.paypal.com/myaccount/autopay/', '_blank');
+  } catch(e) { alert('Error al verificar suscripci\u00f3n'); }
+}
 
 // Init
 (function() {
@@ -832,6 +1042,5 @@ function lo() { tk=null; localStorage.removeItem('token'); document.getElementBy
   if (tk) fp();
 })();
 </script>
-<script src="static/capacitor-bridge.js"></script>
 </body>
 </html>
