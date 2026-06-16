@@ -189,7 +189,7 @@ async def index():
 @app.get("/favicon.png")
 async def favicon():
     if os.path.exists("favicon.png"):
-        return FileResponse("favicon.png")
+        return FileResponse("favicon.png", headers={"Cache-Control": "no-cache"})
     raise HTTPException(404)
 
 @app.get("/static/images/{filename}")
