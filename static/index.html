@@ -3,470 +3,696 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AstroChino — Hor&oacute;scopo Chino 2026</title>
+<title>AstroChino — Sabidur&iacute;a Ancestral China</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 @font-face {
   font-family: 'Kunaroh';
-  src: url('/static/fonts/Kunaroh.ttf') format('truetype');
+  src: url('static/fonts/Kunaroh.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&display=swap');
+
+:root {
+  --red-imperial: #7A0019;
+  --red-dark: #4A0010;
+  --red-garnet: #5F0014;
+  --gold: #D4AF37;
+  --gold-light: #FFD76A;
+  --gold-dark: #A67C00;
+  --carbon: #0F0F10;
+  --ivory: #F6F2E8;
+  --silk: #D8D2C8;
+  --silk-dim: #A09888;
+  --card-bg: rgba(74,0,16,0.6);
+  --card-border: rgba(212,175,55,0.2);
+  --card-hover-border: rgba(212,175,55,0.5);
+  --text: #F6F2E8;
+  --text-dim: #A09888;
+  --radius: 12px;
+  --shadow: 0 4px 30px rgba(0,0,0,0.3);
+}
 
 * { margin:0; padding:0; box-sizing:border-box; }
 
-:root {
-  --bg: #1a0505;
-  --card: rgba(40,10,10,0.85);
-  --card-hover: rgba(60,15,15,0.9);
-  --red: #c62828;
-  --red-deep: #5a0808;
-  --gold: #d4a017;
-  --gold-light: #f0c850;
-  --text: #f0e0cc;
-  --text-dim: #a08870;
-  --border: rgba(212,160,23,0.15);
-}
-
 body {
-  font-family: 'Noto Sans SC', sans-serif;
-  background: var(--bg);
+  font-family: 'Manrope', 'Inter', sans-serif;
+  background: var(--carbon);
   color: var(--text);
   min-height: 100vh;
-  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ── Background ── */
+/* Background with image overlay */
 .bg {
   position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
 }
-.bg .grad {
+.bg-img {
+  position:absolute; inset:0;
+  background: url('static/images/background.png') center/cover no-repeat;
+  opacity:0.7;
+}
+.bg-overlay {
   position:absolute; inset:0;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(180,20,20,0.25) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 80%, rgba(212,160,23,0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 20% 60%, rgba(120,10,10,0.15) 0%, transparent 50%);
-}
-/* Chinese ornament pattern - authentic auspicious clouds + meander + medallions */
-.bg .ornament {
-  position:absolute; inset:0; opacity:0.12;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500' viewBox='0 0 500 500'%3E%3Cdefs%3E%3Cpath id='yun' d='M40 60 Q55 40 80 50 Q95 30 120 45 Q135 25 160 40 Q175 50 160 65 Q135 55 115 65 Q90 50 70 60 Q55 55 45 68Z' fill='none' stroke='%23d4a017' stroke-width='1.2'/%3E%3Cpath id='yun2' d='M20 90 Q35 70 55 78 Q70 60 90 72 Q100 55 115 68 Q125 75 115 85 Q100 78 85 85 Q65 72 52 80 Q40 76 30 88Z' fill='none' stroke='%23d4a017' stroke-width='1'/%3E%3Cpath id='meander' d='M0 0 L15 0 L15 15 L5 15 L5 5 L10 5 L10 10' fill='none' stroke='%23d4a017' stroke-width='0.8'/%3E%3C/defs%3E%3C!-- top clouds --%3E%3Cuse href='%23yun' x='20' y='10'/%3E%3Cuse href='%23yun' x='180' y='20'/%3E%3Cuse href='%23yun' x='340' y='10'/%3E%3Cuse href='%23yun2' x='100' y='50'/%3E%3Cuse href='%23yun2' x='280' y='45'/%3E%3C!-- middle clouds --%3E%3Cuse href='%23yun' x='0' y='180'/%3E%3Cuse href='%23yun' x='160' y='200' transform='scale(-1,1) translate(-320,0)'/%3E%3Cuse href='%23yun' x='300' y='190'/%3E%3Cuse href='%23yun2' x='60' y='240'/%3E%3Cuse href='%23yun2' x='220' y='250' transform='scale(-1,1) translate(-440,0)'/%3E%3Cuse href='%23yun2' x='380' y='230'/%3E%3C!-- bottom clouds --%3E%3Cuse href='%23yun' x='30' y='350'/%3E%3Cuse href='%23yun' x='190' y='370'/%3E%3Cuse href='%23yun' x='350' y='355'/%3E%3Cuse href='%23yun2' x='110' y='410'/%3E%3Cuse href='%23yun2' x='270' y='420'/%3E%3C!-- medallions --%3E%3Cg transform='translate(250,100)'%3E%3Ccircle cx='0' cy='0' r='30' fill='none' stroke='%23d4a017' stroke-width='0.6'/%3E%3Ccircle cx='0' cy='0' r='22' fill='none' stroke='%23d4a017' stroke-width='0.4'/%3E%3Ccircle cx='0' cy='0' r='14' fill='none' stroke='%23d4a017' stroke-width='0.3'/%3E%3C/g%3E%3Cg transform='translate(250,300)'%3E%3Ccircle cx='0' cy='0' r='28' fill='none' stroke='%23d4a017' stroke-width='0.6'/%3E%3Ccircle cx='0' cy='0' r='20' fill='none' stroke='%23d4a017' stroke-width='0.4'/%3E%3C/g%3E%3Cg transform='translate(70,140)'%3E%3Ccircle cx='0' cy='0' r='20' fill='none' stroke='%23d4a017' stroke-width='0.5'/%3E%3Ccircle cx='0' cy='0' r='13' fill='none' stroke='%23d4a017' stroke-width='0.3'/%3E%3C/g%3E%3Cg transform='translate(430,140)'%3E%3Ccircle cx='0' cy='0' r='20' fill='none' stroke='%23d4a017' stroke-width='0.5'/%3E%3Ccircle cx='0' cy='0' r='13' fill='none' stroke='%23d4a017' stroke-width='0.3'/%3E%3C/g%3E%3C!-- meander border top --%3E%3Cpath d='M0 0 L500 0' stroke='%23d4a017' stroke-width='0.5' opacity='0.4'/%3E%3Cuse href='%23meander' x='20' y='0'/%3E%3Cuse href='%23meander' x='60' y='0'/%3E%3Cuse href='%23meander' x='100' y='0'/%3E%3Cuse href='%23meander' x='140' y='0'/%3E%3Cuse href='%23meander' x='180' y='0'/%3E%3Cuse href='%23meander' x='220' y='0'/%3E%3Cuse href='%23meander' x='260' y='0'/%3E%3Cuse href='%23meander' x='300' y='0'/%3E%3Cuse href='%23meander' x='340' y='0'/%3E%3Cuse href='%23meander' x='380' y='0'/%3E%3Cuse href='%23meander' x='420' y='0'/%3E%3Cuse href='%23meander' x='460' y='0'/%3E%3C!-- meander border bottom --%3E%3Cpath d='M0 500 L500 500' stroke='%23d4a017' stroke-width='0.5' opacity='0.4'/%3E%3Cuse href='%23meander' x='20' y='485'/%3E%3Cuse href='%23meander' x='60' y='485'/%3E%3Cuse href='%23meander' x='100' y='485'/%3E%3Cuse href='%23meander' x='140' y='485'/%3E%3Cuse href='%23meander' x='180' y='485'/%3E%3Cuse href='%23meander' x='220' y='485'/%3E%3Cuse href='%23meander' x='260' y='485'/%3E%3Cuse href='%23meander' x='300' y='485'/%3E%3Cuse href='%23meander' x='340' y='485'/%3E%3Cuse href='%23meander' x='380' y='485'/%3E%3Cuse href='%23meander' x='420' y='485'/%3E%3Cuse href='%23meander' x='460' y='485'/%3E%3C!-- meander side left --%3E%3Cpath d='M0 0 L0 500' stroke='%23d4a017' stroke-width='0.5' opacity='0.4'/%3E%3Cg transform='rotate(90,0,0)'%3E%3Cuse href='%23meander' x='20' y='0'/%3E%3Cuse href='%23meander' x='60' y='0'/%3E%3Cuse href='%23meander' x='100' y='0'/%3E%3Cuse href='%23meander' x='140' y='0'/%3E%3Cuse href='%23meander' x='180' y='0'/%3E%3Cuse href='%23meander' x='220' y='0'/%3E%3Cuse href='%23meander' x='260' y='0'/%3E%3Cuse href='%23meander' x='300' y='0'/%3E%3Cuse href='%23meander' x='340' y='0'/%3E%3Cuse href='%23meander' x='380' y='0'/%3E%3Cuse href='%23meander' x='420' y='0'/%3E%3Cuse href='%23meander' x='460' y='0'/%3E%3C/g%3E%3C!-- meander side right --%3E%3Cpath d='M500 0 L500 500' stroke='%23d4a017' stroke-width='0.5' opacity='0.4'/%3E%3Cg transform='rotate(90,500,0)'%3E%3Cuse href='%23meander' x='20' y='500'/%3E%3Cuse href='%23meander' x='60' y='500'/%3E%3Cuse href='%23meander' x='100' y='500'/%3E%3Cuse href='%23meander' x='140' y='500'/%3E%3Cuse href='%23meander' x='180' y='500'/%3E%3Cuse href='%23meander' x='220' y='500'/%3E%3Cuse href='%23meander' x='260' y='500'/%3E%3Cuse href='%23meander' x='300' y='500'/%3E%3Cuse href='%23meander' x='340' y='500'/%3E%3Cuse href='%23meander' x='380' y='500'/%3E%3Cuse href='%23meander' x='420' y='500'/%3E%3Cuse href='%23meander' x='460' y='500'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 500px 500px;
-}
-/* Fire Horse hero background */
-.bg .horse {
-  position:absolute; top:0; left:50%; transform:translateX(-50%);
-  width:100%; height:100%; opacity:0.06;
-  background: url('/static/images/caballo-fuego.webp') center/cover no-repeat;
-}
-@media(min-width:500px) {
-  .bg .horse { opacity:0.08; }
+    radial-gradient(ellipse at 50% 0%, rgba(122,0,25,0.25) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(212,175,55,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 80%, rgba(74,0,16,0.15) 0%, transparent 50%);
 }
 
 /* particles */
 .p { position:absolute; width:3px; height:3px; background:var(--gold-light); border-radius:50%; opacity:0; animation: up 10s ease-in infinite; }
-.p:nth-child(6) { left:8%; animation-delay:0s; }
-.p:nth-child(7) { left:22%; animation-delay:3s; width:4px; height:4px; }
-.p:nth-child(8) { left:38%; animation-delay:6s; }
-.p:nth-child(9) { left:52%; animation-delay:2s; width:5px; height:5px; background:var(--red); }
-.p:nth-child(10) { left:65%; animation-delay:7s; }
-.p:nth-child(11) { left:78%; animation-delay:4s; width:2px; height:2px; }
-.p:nth-child(12) { left:90%; animation-delay:9s; background:var(--red); }
-.p:nth-child(13) { left:45%; animation-delay:5s; width:4px; height:4px; }
-.p:nth-child(14) { left:15%; animation-delay:8s; }
-.p:nth-child(15) { left:60%; animation-delay:1s; width:3px; height:3px; background:var(--gold); }
+.p-wrap { position:absolute; inset:0; pointer-events:none; }
+.p-wrap .p:nth-child(1) { left:5%; animation-delay:0s; }
+.p-wrap .p:nth-child(2) { left:15%; animation-delay:3s; width:4px; height:4px; }
+.p-wrap .p:nth-child(3) { left:28%; animation-delay:6s; }
+.p-wrap .p:nth-child(4) { left:42%; animation-delay:2s; width:5px; height:5px; background:var(--red-imperial); }
+.p-wrap .p:nth-child(5) { left:55%; animation-delay:7s; }
+.p-wrap .p:nth-child(6) { left:68%; animation-delay:4s; width:2px; height:2px; }
+.p-wrap .p:nth-child(7) { left:80%; animation-delay:9s; background:var(--red-imperial); }
+.p-wrap .p:nth-child(8) { left:92%; animation-delay:5s; width:4px; height:4px; }
 @keyframes up {
   0% { transform:translateY(100vh) scale(0); opacity:0; }
-  20% { opacity:0.5; }
-  80% { opacity:0.3; }
+  20% { opacity:0.4; }
+  80% { opacity:0.2; }
   100% { transform:translateY(-10vh) scale(1); opacity:0; }
 }
 
 /* lanterns */
-.ln { position:absolute; opacity:0; animation: sway 20s ease-in-out infinite; pointer-events:none; }
-.ln::before { content:''; display:block; width:28px; height:34px; background:radial-gradient(ellipse at 50% 60%, var(--red), var(--red-deep)); border-radius:50% 50% 40% 40%; box-shadow:0 0 30px rgba(160,10,10,0.2); }
+.ln { position:absolute; opacity:0; animation: sway 40s ease-in-out infinite; pointer-events:none; }
+.ln::before { content:''; display:block; width:28px; height:34px; background:radial-gradient(ellipse at 50% 60%, var(--red-imperial), #4A0010); border-radius:50% 50% 40% 40%; box-shadow:0 0 30px rgba(160,10,10,0.3); }
 .ln::after { content:''; display:block; width:2px; height:8px; background:var(--gold); margin:0 auto; }
-.ln:nth-child(16) { left:3%; animation-delay:0s; }
-.ln:nth-child(17) { left:15%; animation-delay:5s; }
-.ln:nth-child(18) { right:10%; animation-delay:3s; }
-.ln:nth-child(19) { right:3%; animation-delay:8s; width:24px; }
-.ln:nth-child(20) { left:50%; animation-delay:10s; width:22px; opacity:0.3; }
+.ln-wrap { position:absolute; inset:0; pointer-events:none; }
+.ln-wrap .ln:nth-child(1) { left:3%; animation-delay:0s; }
+.ln-wrap .ln:nth-child(2) { left:15%; animation-delay:10s; }
+.ln-wrap .ln:nth-child(3) { right:10%; animation-delay:6s; }
+.ln-wrap .ln:nth-child(4) { right:3%; animation-delay:16s; width:24px; }
+.ln-wrap .ln:nth-child(5) { left:50%; animation-delay:22s; width:22px; }
 @keyframes sway {
-  0% { transform:translateY(100vh) rotate(-2deg); opacity:0; }
-  15% { opacity:0.35; }
-  50% { transform:translateY(40vh) rotate(2deg); opacity:0.25; }
-  85% { opacity:0.15; }
-  100% { transform:translateY(-10vh) rotate(-2deg); opacity:0; }
+  0% { transform:translateY(100vh) rotate(-3deg); opacity:0; }
+  15% { opacity:0.6; }
+  50% { transform:translateY(30vh) rotate(3deg); opacity:0.5; }
+  85% { opacity:0.4; }
+  100% { transform:translateY(-10vh) rotate(-3deg); opacity:0; }
 }
 
-/* ── Content ── */
-.content { position:relative; z-index:1; max-width:680px; margin:0 auto; padding:0 12px 120px; }
+/* Content layer */
+.content { position:relative; z-index:1; max-width:1000px; margin:0 auto; padding:0 20px 100px; }
 
-/* ── Header ── */
-.hd {
-  text-align:center; padding:36px 16px 8px;
+/* Header with AC monogram */
+.header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:24px 0 16px; border-bottom:1px solid var(--card-border);
 }
-.hd h1 {
-  font-family: 'Kunaroh', 'Noto Sans SC', sans-serif;
-  font-size: 3rem; font-weight: normal; letter-spacing: 8px;
-  background: linear-gradient(180deg, #f0c850 0%, #d4a017 40%, #b8860b 100%);
+.logo {
+  display:flex; align-items:center; gap:12px;
+}
+.logo-icon {
+  width:52px; height:52px; border-radius:50%; object-fit:cover;
+  border:1.5px solid var(--gold);
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.85));
+}
+.logo-text {
+  font-family: 'Kunaroh', serif; font-size:1.3rem; color:var(--gold);
+  letter-spacing:3px; line-height:1;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+}
+.logo-sub {
+  font-size:0.55rem; color:var(--silk-dim); letter-spacing:4px;
+  text-transform:uppercase; margin-top:2px;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+}
+.header-nav {
+  display:flex; gap:4px;
+}
+.header-nav button {
+  background:none; border:none; color:var(--silk-dim); cursor:pointer;
+  font-family:'Manrope',sans-serif; font-size:0.7rem; font-weight:500;
+  letter-spacing:1px; padding:8px 16px; transition:0.2s;
+  text-transform:uppercase; text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+}
+.header-nav button:hover, .header-nav button.active {
+  color:var(--gold);
+}
+
+/* Hero section */
+.hero {
+  padding:60px 0 40px; text-align:center;
+}
+.hero h1 {
+  font-family: 'Kunaroh', serif;
+  font-size:3.2rem; font-weight:400;
+  letter-spacing:10px; line-height:1.2;
+  background: linear-gradient(180deg, #FFD76A 0%, #D4AF37 40%, #A67C00 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 30px rgba(212,160,23,0.3));
+  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.6)) drop-shadow(0 0 25px rgba(212,175,55,0.3));
   animation: gl 4s ease-in-out infinite;
 }
 @keyframes gl {
-  0%, 100% { filter: drop-shadow(0 0 25px rgba(212,160,23,0.3)); }
-  50% { filter: drop-shadow(0 0 45px rgba(212,160,23,0.5)); }
+  0%, 100% { filter: drop-shadow(0 3px 10px rgba(0,0,0,0.6)) drop-shadow(0 0 25px rgba(212,175,55,0.3)); }
+  50% { filter: drop-shadow(0 3px 10px rgba(0,0,0,0.6)) drop-shadow(0 0 50px rgba(212,175,55,0.6)); }
 }
-.hd .cn {
-  font-size: 0.8rem; font-weight: 300; letter-spacing: 6px; margin-top: 2px;
-  color: var(--gold); -webkit-text-fill-color: var(--gold);
+.hero .sub {
+  display:flex; align-items:center; justify-content:center; gap:12px;
+  margin-top:8px; font-size:0.75rem; color:var(--silk-dim);
+  letter-spacing:4px; text-transform:uppercase;
 }
-.hd .cn em { color: var(--red); -webkit-text-fill-color: var(--red); font-style:normal; }
-.hd .yi { margin-top:10px; font-size:0.75rem; }
-.hd .yi .yi-b { color:var(--gold); font-weight:700; letter-spacing:2px; }
-.hd .yi .yi-s { color:var(--text-dim); font-size:0.65rem; margin-left:6px; }
+.hero .sub span { color:var(--gold); }
+.hero .year-box {
+  display:inline-flex; align-items:center; gap:16px;
+  margin-top:20px; padding:12px 28px;
+  border:1px solid var(--card-border);
+  background: rgba(74,0,16,0.3);
+  font-size:0.75rem; color:var(--silk);
+  letter-spacing:2px;
+}
+.hero .year-box em { color:var(--gold-light); font-style:normal; font-weight:600; }
 
-/* ── Cards ── */
-.card {
-  background: var(--card); backdrop-filter:blur(6px);
-  border: 1px solid var(--border);
-  padding: 16px; margin-bottom: 12px;
+/* SACRED GEOMETRY DIVIDER */
+.divider {
+  display:flex; align-items:center; justify-content:center; gap:12px;
+  margin:8px 0 28px;
 }
-.card-t {
-  font-size:0.8rem; font-weight:700; color:var(--gold-light);
-  letter-spacing:2px; margin-bottom:10px; text-transform:uppercase;
+.divider::before, .divider::after {
+  content:''; flex:1; height:1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dark), transparent);
+}
+.divider .diamond {
+  width:8px; height:8px; border:1px solid var(--gold-dark);
+  transform: rotate(45deg); opacity:0.6;
 }
 
-/* ── Calc Row ── */
-.cr { display:flex; gap:6px; }
-.cr select, input, select {
-  flex:1; padding:9px 10px; border:1px solid var(--border);
-  background: rgba(0,0,0,0.4); color:var(--text);
-  font-family:'Noto Sans SC', sans-serif; font-size:0.75rem;
-  border-radius:2px;
+/* SECTION TITLES */
+.section-title {
+  font-family: 'Kunaroh', serif;
+  font-size:1.6rem; font-weight:400; color:var(--gold);
+  letter-spacing:6px; text-align:center; margin-bottom:4px;
 }
-select:focus, input:focus { outline:none; border-color:var(--gold); }
-
-/* ── Button ── */
-.btn {
-  display:inline-block; padding:10px 24px; border:none; cursor:pointer;
-  font-family:'Noto Sans SC', sans-serif; font-size:0.72rem; font-weight:700;
-  letter-spacing:2px; text-transform:uppercase;
-  background: linear-gradient(180deg, var(--red), var(--red-deep));
-  color: var(--gold); transition:0.2s;
+.section-sub {
+  font-size:0.6rem; color:var(--silk-dim); letter-spacing:5px;
+  text-transform:uppercase; text-align:center; margin-bottom:24px;
 }
-.btn:hover { filter:brightness(1.2); }
-.btn-f { width:100%; margin-top:8px; }
 
-/* ── Animal Grid ── */
-.ag { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-.ac {
-  cursor:pointer; border:1px solid var(--border); overflow:hidden;
-  transition:0.25s; background:rgba(30,8,8,0.6);
+/* CALCULATOR CARD */
+.calc-card {
+  max-width:520px; margin:0 auto 32px;
+  padding:28px; border:1px solid var(--card-border);
+  background: var(--card-bg);
+  text-align:center;
 }
-.ac:hover { border-color:var(--gold); transform:translateY(-2px); box-shadow:0 6px 20px rgba(212,160,23,0.08); }
-.ac img { width:100%; display:block; aspect-ratio:1; object-fit:cover; }
-.ac .lbl { padding:5px 6px 6px; text-align:center; background:rgba(0,0,0,0.2); }
-.ac .lbl .n { font-size:0.72rem; font-weight:700; color:var(--gold); letter-spacing:1px; }
-.ac .lbl .s { font-size:0.58rem; color:var(--text-dim); margin-top:1px; }
+.calc-card .calc-h {
+  font-family: 'Kunaroh', serif; font-size:1rem; color:var(--gold);
+  letter-spacing:4px; margin-bottom:16px;
+}
+.calc-row {
+  display:flex; gap:6px; margin-bottom:12px;
+}
+.calc-row select {
+  flex:1; padding:10px 12px;
+  background: rgba(15,15,16,0.6); border:1px solid var(--card-border);
+  color:var(--text); font-family:'Manrope',sans-serif; font-size:0.7rem;
+  outline:none; transition:0.2s; cursor:pointer;
+}
+.calc-row select:focus { border-color:var(--gold); }
+.calc-btn {
+  padding:10px 32px; border:1px solid var(--gold);
+  background: linear-gradient(180deg, rgba(212,175,55,0.08), rgba(212,175,55,0.02));
+  color:var(--gold); font-family:'Manrope',sans-serif; font-size:0.65rem;
+  font-weight:600; letter-spacing:3px; text-transform:uppercase;
+  cursor:pointer; transition:0.3s; width:100%;
+}
+.calc-btn:hover { background: linear-gradient(180deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05)); }
+.calc-result {
+  margin-top:12px; padding:16px; border:1px solid var(--card-border);
+  display:none;
+}
+.calc-result.show { display:flex; align-items:center; gap:16px; text-align:left; }
+.calc-result img { width:52px; height:52px; object-fit:cover; border:1px solid var(--gold-dark); }
+.calc-result .info h3 { font-size:0.85rem; color:var(--gold); font-weight:600; }
+.calc-result .info p { font-size:0.65rem; color:var(--silk-dim); margin-top:2px; }
 
-/* ── Modal ── */
-.mo {
+/* ANIMAL GRID - premium cards like imperial plates */
+.animal-grid {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
+  margin-bottom:28px;
+}
+.animal-card {
+  cursor:pointer; border:1px solid var(--card-border);
+  background: var(--card-bg); overflow:hidden;
+  transition:0.3s; position:relative;
+}
+.animal-card:hover {
+  border-color:var(--gold); transform:translateY(-3px);
+  box-shadow:0 8px 32px rgba(212,175,55,0.06);
+}
+.animal-card img {
+  width:100%; display:block; aspect-ratio:1; object-fit:cover;
+  transition:0.4s;
+}
+.animal-card:hover img { transform:scale(1.02); }
+.animal-card .label {
+  padding:8px 10px; text-align:center;
+  border-top:1px solid var(--card-border);
+}
+.animal-card .label .name {
+  font-size:0.68rem; font-weight:600; color:var(--gold);
+  letter-spacing:2px;
+}
+.animal-card .label .sub {
+  font-size:0.55rem; color:var(--silk-dim); margin-top:2px;
+  letter-spacing:1px;
+}
+
+/* DASHBOARD SECTIONS GRID */
+.dashboard-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+  margin-bottom:28px;
+}
+.dash-card {
+  padding:24px; border:1px solid var(--card-border);
+  background: var(--card-bg);
+  cursor:pointer; transition:0.3s;
+  text-align:center;
+}
+.dash-card:hover {
+  border-color:var(--gold); transform:translateY(-2px);
+  box-shadow:0 6px 24px rgba(212,175,55,0.04);
+}
+.dash-card .icon {
+  font-size:1.2rem; margin-bottom:8px;
+  color:var(--gold); opacity:0.7;
+}
+.dash-card h4 {
+  font-family: 'Kunaroh', serif;
+  font-size:0.8rem; color:var(--gold); font-weight:400;
+  letter-spacing:2px;
+}
+.dash-card p {
+  font-size:0.6rem; color:var(--silk-dim); margin-top:4px;
+  letter-spacing:0.5px;
+}
+
+/* HOROSCOPE PERIOD TABS */
+.tabs {
+  display:flex; gap:4px; margin-bottom:16px; justify-content:center;
+}
+.tabs button {
+  padding:6px 18px; border:1px solid var(--card-border);
+  background: rgba(15,15,16,0.4); color:var(--silk-dim);
+  cursor:pointer; font-family:'Manrope',sans-serif; font-size:0.6rem;
+  font-weight:500; letter-spacing:2px; text-transform:uppercase;
+  transition:0.2s;
+}
+.tabs button.active, .tabs button:hover {
+  border-color:var(--gold); color:var(--gold);
+  background: rgba(212,175,55,0.04);
+}
+
+/* HOROSCOPE LIST */
+.horo-list { margin-bottom:28px; }
+.horo-item {
+  display:flex; align-items:center; gap:12px; padding:10px 14px;
+  border:1px solid var(--card-border); margin-bottom:4px;
+  cursor:pointer; transition:0.2s;
+}
+.horo-item:hover { border-color:var(--gold-dark); background: rgba(74,0,16,0.3); }
+.horo-item img { width:36px; height:36px; object-fit:cover; flex-shrink:0; }
+.horo-item .info { flex:1; min-width:0; }
+.horo-item .info .n { font-size:0.72rem; font-weight:600; color:var(--gold); }
+.horo-item .info .p { font-size:0.6rem; color:var(--silk-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.horo-item .arrow { color:var(--gold-dark); opacity:0.3; font-size:0.9rem; }
+
+/* HOROSCOPE EXPANDED */
+.horo-exp {
+  padding:16px; border:1px solid var(--gold-dark);
+  background: rgba(74,0,16,0.3); margin-bottom:4px;
+  animation:fadeIn 0.25s ease;
+}
+@keyframes fadeIn { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
+.horo-exp .top { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.horo-exp .top img { width:36px; height:36px; object-fit:cover; }
+.horo-exp .top .nn { font-weight:600; font-size:0.75rem; color:var(--gold); }
+.horo-exp .top .dd { font-size:0.55rem; color:var(--silk-dim); }
+.horo-exp .tx { font-size:0.7rem; line-height:1.7; color:var(--silk); }
+.horo-exp .lucky { font-size:0.6rem; color:var(--gold-dark); margin-top:8px; padding-top:8px; border-top:1px solid var(--card-border); }
+
+/* MODAL - imperial plate */
+.modal {
   display:none; position:fixed; z-index:100; inset:0;
-  background:rgba(0,0,0,0.85); backdrop-filter:blur(4px);
+  background: rgba(15,15,16,0.9); backdrop-filter:blur(8px);
   align-items:center; justify-content:center;
 }
-.mo.s { display:flex; }
-.m {
-  background:#1a0808; border:1px solid var(--gold);
-  max-width:480px; width:92%; max-height:92vh; overflow-y:auto;
-  animation:fi .25s ease;
+.modal.open { display:flex; }
+.modal-content {
+  max-width:500px; width:92%; max-height:90vh; overflow-y:auto;
+  background: var(--red-dark); border:1px solid var(--gold);
+  box-shadow:0 16px 60px rgba(0,0,0,0.5);
 }
-@keyframes fi { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
-.m-x {
+.modal-close {
   position:sticky; top:8px; float:right; margin:8px 12px 0 0;
-  background:rgba(0,0,0,0.5); border:1px solid var(--border);
-  color:var(--text-dim); width:30px; height:30px; cursor:pointer;
-  font-family:'Noto Sans SC', sans-serif; font-size:0.9rem;
+  background: rgba(15,15,16,0.6); border:1px solid var(--card-border);
+  color:var(--silk-dim); width:30px; height:30px; cursor:pointer;
+  font-family:'Manrope',sans-serif; font-size:0.8rem; transition:0.2s;
 }
-.m-img { width:100%; aspect-ratio:1; object-fit:cover; }
-.m-b { padding:14px 18px 18px; }
-.m-b h2 { font-size:1.2rem; font-weight:700; color:var(--gold); letter-spacing:1px; }
-.m-b .mt { font-size:0.7rem; color:var(--text-dim); margin-bottom:10px; }
-.ms { margin-bottom:12px; }
-.ms h3 { font-size:0.68rem; font-weight:400; color:var(--gold); letter-spacing:2px; text-transform:uppercase; border-bottom:1px solid var(--border); padding-bottom:3px; margin-bottom:5px; }
-.ms p { font-size:0.8rem; line-height:1.6; }
-.ms .tg { display:flex; flex-wrap:wrap; gap:4px; font-size:0.7rem; color:var(--gold-light); }
-.ys { display:flex; flex-wrap:wrap; gap:4px; }
-.ys .y { padding:2px 10px; background:rgba(0,0,0,0.3); border:1px solid var(--border); font-size:0.7rem; }
+.modal-close:hover { color:var(--gold); border-color:var(--gold); }
+.modal-img { width:100%; aspect-ratio:1; object-fit:cover; }
+.modal-body { padding:16px 20px 20px; }
+.modal-body h2 { font-family:'Kunaroh',serif; font-size:1.2rem; font-weight:400; color:var(--gold); letter-spacing:2px; }
+.modal-body .meta { font-size:0.6rem; color:var(--silk-dim); margin-bottom:12px; letter-spacing:1px; }
+.modal-body .meta span { color:var(--gold-light); }
+.modal-section { margin-bottom:12px; }
+.modal-section h3 { font-size:0.6rem; font-weight:600; color:var(--gold); letter-spacing:2px; text-transform:uppercase; border-bottom:1px solid var(--card-border); padding-bottom:4px; margin-bottom:6px; }
+.modal-section p { font-size:0.72rem; line-height:1.6; color:var(--silk); }
+.modal-section .tags { display:flex; flex-wrap:wrap; gap:4px; font-size:0.65rem; color:var(--gold-light); }
+.years { display:flex; flex-wrap:wrap; gap:4px; }
+.years .y { padding:2px 10px; background:rgba(15,15,16,0.4); border:1px solid var(--card-border); font-size:0.6rem; color:var(--silk); }
 
-/* ── Horoscope ── */
-.hi {
-  display:flex; align-items:center; gap:10px; padding:10px;
-  border:1px solid var(--border); margin-bottom:5px; cursor:pointer; transition:0.2s;
+/* COMPAT SECTION */
+.compat-card {
+  max-width:520px; margin:0 auto 28px;
+  padding:24px; border:1px solid var(--card-border);
+  background: var(--card-bg);
 }
-.hi:hover { border-color:var(--gold); background:rgba(60,15,15,0.5); }
-.hi img { width:40px; height:40px; object-fit:cover; flex-shrink:0; }
-.hi .inf { flex:1; min-width:0; }
-.hi .inf .n { font-weight:700; font-size:0.78rem; color:var(--gold); }
-.hi .inf .p { font-size:0.68rem; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.hi .ar { color:var(--gold); opacity:0.3; font-size:1.1rem; }
-.he {
-  padding:12px; margin-top:-2px; margin-bottom:5px;
-  border:1px solid var(--gold); background:rgba(30,8,8,0.6);
-  animation:fi .2s ease;
+.compat-card .ch { font-family:'Kunaroh',serif; font-size:0.9rem; color:var(--gold); letter-spacing:3px; margin-bottom:14px; text-align:center; }
+.compat-row { display:flex; gap:6px; margin-bottom:12px; }
+.compat-row select { flex:1; padding:10px 12px; background:rgba(15,15,16,0.6); border:1px solid var(--card-border); color:var(--text); font-family:'Manrope',sans-serif; font-size:0.7rem; outline:none; cursor:pointer; }
+.compat-row select:focus { border-color:var(--gold); }
+.compat-result { margin-top:12px; text-align:center; display:none; }
+.compat-result.show { display:block; }
+.compat-result .pair { display:flex; align-items:center; justify-content:center; gap:12px; margin:8px 0; }
+.compat-result .pair img { width:40px; height:40px; object-fit:cover; border:1px solid var(--gold-dark); }
+.compat-result .pair .nn { font-size:0.7rem; color:var(--gold); font-weight:600; }
+.compat-result .bar { height:3px; background:rgba(255,255,255,0.04); overflow:hidden; margin:6px 0; }
+.compat-result .bar-fill { height:100%; transition:width .5s; }
+.compat-result .level { font-size:0.75rem; font-weight:600; }
+.compat-result .desc { font-size:0.65rem; color:var(--silk-dim); margin-top:4px; }
+
+/* ACCOUNT */
+.account-card {
+  max-width:400px; margin:0 auto 28px;
+  padding:24px; border:1px solid var(--card-border);
+  background: var(--card-bg);
 }
-.he .tp { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-.he .tp img { width:36px; height:36px; object-fit:cover; }
-.he .tp .nn { font-weight:700; font-size:0.8rem; color:var(--gold); }
-.he .tp .dd { font-size:0.62rem; color:var(--text-dim); }
-.he .tx { font-size:0.78rem; line-height:1.6; white-space:pre-wrap; }
-.he .lu { font-size:0.68rem; color:var(--gold); margin-top:6px; padding-top:5px; border-top:1px solid var(--border); }
+.account-card .ac-h { font-family:'Kunaroh',serif; font-size:0.9rem; color:var(--gold); letter-spacing:3px; margin-bottom:14px; text-align:center; }
+.account-card input { width:100%; padding:10px 12px; margin-bottom:6px; background:rgba(15,15,16,0.6); border:1px solid var(--card-border); color:var(--text); font-family:'Manrope',sans-serif; font-size:0.7rem; outline:none; }
+.account-card input:focus { border-color:var(--gold); }
+.account-card .ar { display:flex; gap:6px; }
+.account-card .ar select { flex:1; padding:10px 12px; background:rgba(15,15,16,0.6); border:1px solid var(--card-border); color:var(--text); font-family:'Manrope',sans-serif; font-size:0.7rem; outline:none; cursor:pointer; }
+.account-card .ar select:focus { border-color:var(--gold); }
+.account-link { font-size:0.6rem; color:var(--gold); cursor:pointer; text-align:center; margin-top:6px; display:block; }
+.account-link:hover { text-decoration:underline; }
+.msg { margin-top:6px; padding:6px; font-size:0.6rem; display:none; }
+.msg.e { display:block; background:rgba(198,40,40,0.08); border-left:2px solid var(--red-imperial); color:#ff6b6b; }
+.msg.s { display:block; background:rgba(76,175,80,0.06); border-left:2px solid #4caf50; color:#69f0ae; }
+.premium-badge { display:inline-block; border:1px solid var(--gold); color:var(--gold); padding:2px 12px; font-size:0.5rem; font-weight:600; letter-spacing:1px; }
 
-/* ── Period Tabs ── */
-.pt { display:flex; gap:4px; margin-bottom:10px; overflow-x:auto; }
-.pt button {
-  padding:5px 12px; border:1px solid var(--border);
-  background:rgba(0,0,0,0.3); color:var(--text-dim);
-  cursor:pointer; font-size:0.65rem; font-family:'Noto Sans SC', sans-serif;
-  white-space:nowrap; transition:0.2s; text-transform:uppercase; letter-spacing:1px;
-}
-.pt button.a { border-color:var(--gold); color:var(--gold); background:rgba(212,160,23,0.08); }
-.pt button:hover { border-color:var(--gold); color:var(--gold); }
+/* PROFILE */
+.profile-card { text-align:center; padding:24px; border:1px solid var(--card-border); background:var(--card-bg); max-width:400px; margin:0 auto 28px; }
+.profile-card img { width:60px; height:60px; object-fit:cover; border:1px solid var(--gold-dark); margin:0 auto 8px; display:block; }
+.profile-card .pn { font-weight:600; font-size:0.8rem; color:var(--gold); }
+.profile-card .ps { font-size:0.6rem; color:var(--silk-dim); margin-top:2px; }
 
-/* ── Calc Result ── */
-.cr2 { text-align:center; padding:10px; margin-top:8px; border:1px solid var(--border); }
-.cr2 img { width:60px; height:60px; object-fit:cover; margin-bottom:4px; }
-.cr2 h3 { font-size:0.9rem; color:var(--gold); }
-.cr2 p { font-size:0.72rem; color:var(--text-dim); }
+/* SECTIONS */
+.sec { display:none; }
+.sec.active { display:block; }
 
-/* ── Compat ── */
-.cd { text-align:center; padding:8px 0; }
-.cd .pr { display:flex; align-items:center; justify-content:center; gap:10px; margin:6px 0; }
-.cd .pr img { width:44px; height:44px; object-fit:cover; }
-.cd .pr .nn { font-size:0.8rem; color:var(--gold); font-weight:700; }
-.cd .pr .hrt { color:var(--red); font-size:1.2rem; }
-.cd .cb { height:4px; background:rgba(255,255,255,0.04); overflow:hidden; margin:6px 0; }
-.cd .cbf { height:100%; transition:width .5s; }
-.cd .lv { font-size:0.9rem; font-weight:700; }
-.cd .ds { font-size:0.75rem; color:var(--text-dim); margin-top:5px; }
+/* FOOTER */
+.footer { text-align:center; padding:20px 0; font-size:0.5rem; color:var(--silk-dim); opacity:0.3; letter-spacing:3px; border-top:1px solid var(--card-border); margin-top:20px; }
 
-/* ── Auth ── */
-.msg { margin-top:6px; padding:6px; font-size:0.68rem; display:none; }
-.msg.e { display:block; background:rgba(180,30,30,0.12); border-left:2px solid var(--red); color:#ff6b6b; }
-.msg.s { display:block; background:rgba(76,175,80,0.08); border-left:2px solid #4caf50; color:#69f0ae; }
-.pb { display:inline-block; background:linear-gradient(135deg,var(--gold),#a67c00); color:#0d0303; padding:2px 12px; font-size:0.6rem; font-weight:700; letter-spacing:1px; }
-
-/* ── Nav ── */
-.nv {
+/* NAVIGATION BOTTOM */
+.bottom-nav {
   position:fixed; bottom:0; left:0; right:0; z-index:50;
   display:flex; justify-content:space-around;
-  background: linear-gradient(180deg, rgba(13,3,3,0.97), rgba(13,3,3,1));
-  border-top:1px solid var(--border);
-  padding:5px 0 14px; max-width:680px; margin:0 auto;
+  background: linear-gradient(180deg, rgba(15,15,16,0.97), rgba(15,15,16,1));
+  border-top:1px solid var(--card-border);
+  padding:5px 0 14px; max-width:1000px; margin:0 auto;
 }
-.nv button {
-  background:none; border:none; color:var(--text-dim);
-  font-size:0.55rem; cursor:pointer;
+.bottom-nav button {
+  background:none; border:none; color:var(--silk-dim);
+  font-size:0.5rem; cursor:pointer;
   display:flex; flex-direction:column; align-items:center;
-  gap:1px; padding:3px 14px;
-  font-family:'Noto Sans SC', sans-serif; letter-spacing:0.5px;
+  gap:1px; padding:3px 16px;
+  font-family:'Manrope',sans-serif; font-weight:500; letter-spacing:1px;
   transition:0.2s; text-transform:uppercase;
 }
-.nv button.a { color:var(--gold); }
-.nv button i { font-size:1rem; filter:brightness(0.5); }
-.nv button.a i { filter:brightness(1); }
+.bottom-nav button.active { color:var(--gold); }
+.bottom-nav button i { font-size:0.9rem; filter:brightness(0.4); transition:0.2s; }
+.bottom-nav button.active i { filter:brightness(1); }
+.bottom-nav button:active { transform:scale(0.95); }
 
-.sec { display:none; }
-.sec.a { display:block; }
-
-.ft { text-align:center; padding:18px 0; font-size:0.55rem; color:var(--text-dim); opacity:0.3; letter-spacing:3px; }
-
+/* Scrollbar */
 ::-webkit-scrollbar { width:3px; }
-::-webkit-scrollbar-track { background:var(--bg); }
-::-webkit-scrollbar-thumb { background:var(--red); }
+::-webkit-scrollbar-track { background:var(--carbon); }
+::-webkit-scrollbar-thumb { background:var(--red-imperial); }
+
+/* RESPONSIVE */
+@media(max-width:700px) {
+  .animal-grid { grid-template-columns:repeat(3,1fr); }
+  .dashboard-grid { grid-template-columns:repeat(2,1fr); }
+  .header-nav { display:none; }
+  .hero h1 { font-size:2.2rem; letter-spacing:6px; }
+}
+@media(max-width:420px) {
+  .animal-grid { grid-template-columns:repeat(2,1fr); }
+  .dashboard-grid { grid-template-columns:1fr; }
+}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
 <div class="bg">
-  <div class="grad"></div>
-  <div class="ornament"></div>
-  <div class="horse"></div>
-  <div class="p"></div><div class="p"></div><div class="p"></div><div class="p"></div><div class="p"></div>
-  <div class="p"></div><div class="p"></div><div class="p"></div><div class="p"></div><div class="p"></div>
-  <div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div>
+  <div class="bg-img"></div>
+  <div class="bg-overlay"></div>
+  <div class="p-wrap">
+    <div class="p"></div><div class="p"></div><div class="p"></div><div class="p"></div><div class="p"></div>
+    <div class="p"></div><div class="p"></div><div class="p"></div>
+  </div>
+  <div class="ln-wrap">
+    <div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div>
+  </div>
 </div>
 
 <div class="content">
 
-<div class="hd">
-  <h1>AstroChino</h1>
-  <div class="cn">2026 <em>·</em> 丙午 <em>·</em> 4724</div>
-  <div class="yi"><span class="yi-b">A&ntilde;o del Caballo de Fuego</span><span class="yi-s"> 17 Feb 2026 — 5 Feb 2027</span></div>
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <img class="logo-icon" src="static/images/logo.png" alt="AstroChino">
+    <div>
+      <div class="logo-text">AstroChino</div>
+      <div class="logo-sub">Sabidur&iacute;a Ancestral</div>
+    </div>
+  </div>
+  <div class="header-nav">
+    <button class="active" onclick="st('th')">Inicio</button>
+    <button onclick="st('ts')">Signos</button>
+    <button onclick="st('tc')">Compatibilidad</button>
+    <button onclick="st('tu')">Cuenta</button>
+  </div>
 </div>
 
-<!-- ── HOME ── -->
-<div class="sec a" id="th">
-  <div class="card">
-    <div class="card-t">Tu signo</div>
-    <div class="cr">
+<!-- HOME -->
+<div class="sec active" id="th">
+  <div class="hero">
+    <h1>AstroChino</h1>
+    <div class="sub">2026 <span>·</span> 丙午 <span>·</span> 4724</div>
+    <div class="year-box">
+      <span>A&ntilde;o del Caballo de Fuego</span>
+      <em>17 Feb 2026 — 5 Feb 2027</em>
+    </div>
+  </div>
+
+  <div class="divider"><div class="diamond"></div></div>
+
+  <!-- CALC -->
+  <div class="calc-card">
+    <div class="calc-h">Tu Signo</div>
+    <div class="calc-row">
       <select id="cd"></select>
       <select id="cm"></select>
       <select id="cy"></select>
     </div>
-    <button class="btn btn-f" onclick="cs()">Descubrir</button>
-    <div id="cr2"></div>
+    <button class="calc-btn" onclick="cs()">Descubrir</button>
+    <div class="calc-result" id="cr"></div>
   </div>
 
-  <div class="ag" id="ag"></div>
+  <!-- ANIMAL GRID HOME -->
+  <div class="section-sub">Los Doce Animales Celestiales</div>
+  <div class="animal-grid" id="ag"></div>
 
-  <div style="margin-top:14px;">
-    <div class="pt" id="pn"></div>
-    <div id="hl"></div>
-  </div>
+  <div class="divider"><div class="diamond"></div></div>
+
+  <!-- DASHBOARD -->
+  <div class="section-title">Observatorio</div>
+  <div class="section-sub">Herramientas de sabidur&iacute;a ancestral</div>
+  <div class="dashboard-grid" id="dg"></div>
+
+  <div class="divider"><div class="diamond"></div></div>
+
+  <!-- HOROSCOPE -->
+  <div class="section-title">Hor&oacute;scopo</div>
+  <div class="section-sub">Predicciones celestiales</div>
+  <div class="tabs" id="pt"></div>
+  <div class="horo-list" id="hl"></div>
 </div>
 
-<!-- ── SIGNOS ── -->
+<!-- SIGNOS -->
 <div class="sec" id="ts">
-  <div class="ag" id="sg"></div>
+  <div class="section-title">Signos</div>
+  <div class="section-sub">Los doce animales del zod&iacute;aco chino</div>
+  <div class="animal-grid" id="sg"></div>
 </div>
 
-<!-- ── COMPAT ── -->
+<!-- COMPAT -->
 <div class="sec" id="tc">
-  <div class="card">
-    <div class="card-t">Compatibilidad</div>
-    <div class="cr">
+  <div class="section-title">Compatibilidad</div>
+  <div class="section-sub">Conexiones entre signos</div>
+  <div class="compat-card">
+    <div class="ch">Consultar Compatibilidad</div>
+    <div class="compat-row">
       <select id="c1"></select>
       <select id="c2"></select>
     </div>
-    <button class="btn btn-f" onclick="cc()">Consultar</button>
-    <div id="cres"></div>
+    <button class="calc-btn" onclick="cc()">Consultar</button>
+    <div class="compat-result" id="cres"></div>
   </div>
 </div>
 
-<!-- ── CUENTA ── -->
+<!-- CUENTA -->
 <div class="sec" id="tu">
+  <div class="section-title">Cuenta</div>
+  <div class="section-sub">Tu perfil celestial</div>
   <div id="as">
-    <div class="card" id="rf">
-      <div class="card-t">Crear Cuenta</div>
-      <input type="email" id="re" placeholder="Email" style="width:100%;margin-bottom:5px;">
-      <input type="text" id="rn" placeholder="Nombre" style="width:100%;margin-bottom:5px;">
-      <input type="password" id="rp" placeholder="Contrase&ntilde;a" style="width:100%;margin-bottom:6px;">
-      <label style="font-size:0.65rem;color:var(--text-dim);">Fecha de nacimiento</label>
-      <div class="cr">
+    <div class="account-card" id="rf">
+      <div class="ac-h">Crear Cuenta</div>
+      <input type="email" id="re" placeholder="Email">
+      <input type="text" id="rn" placeholder="Nombre">
+      <input type="password" id="rp" placeholder="Contrase&ntilde;a">
+      <label style="font-size:0.6rem;color:var(--silk-dim);display:block;margin:6px 0 4px;">Fecha de nacimiento</label>
+      <div class="ar">
         <select id="rd"></select>
         <select id="rm"></select>
         <select id="ry"></select>
       </div>
-      <button class="btn btn-f" onclick="reg()">Registrarse</button>
+      <button class="calc-btn" onclick="reg()" style="margin-top:8px;">Registrarse</button>
       <div id="rmsg" class="msg"></div>
-      <p style="margin-top:6px;font-size:0.65rem;text-align:center;color:var(--text-dim);">
-        Ya ten&eacute;s cuenta? <a href="#" onclick="ta(1)" style="color:var(--gold);">Iniciar sesi&oacute;n</a>
-      </p>
+      <span class="account-link" onclick="ta(1)">Ya ten&eacute;s cuenta? Iniciar sesi&oacute;n</span>
     </div>
-    <div class="card" id="lf" style="display:none;">
-      <div class="card-t">Iniciar Sesi&oacute;n</div>
-      <input type="email" id="le" placeholder="Email" style="width:100%;margin-bottom:5px;">
-      <input type="password" id="lp" placeholder="Contrase&ntilde;a" style="width:100%;margin-bottom:6px;">
-      <button class="btn btn-f" onclick="lin()">Ingresar</button>
+    <div class="account-card" id="lf" style="display:none;">
+      <div class="ac-h">Iniciar Sesi&oacute;n</div>
+      <input type="email" id="le" placeholder="Email">
+      <input type="password" id="lp" placeholder="Contrase&ntilde;a">
+      <button class="calc-btn" onclick="lin()" style="margin-top:6px;">Ingresar</button>
       <div id="lmsg" class="msg"></div>
-      <p style="margin-top:6px;font-size:0.65rem;text-align:center;color:var(--text-dim);">
-        No ten&eacute;s cuenta? <a href="#" onclick="ta(0)" style="color:var(--gold);">Registrarse</a>
-      </p>
+      <span class="account-link" onclick="ta(0)">No ten&eacute;s cuenta? Registrarse</span>
     </div>
   </div>
-  <div id="ps" style="display:none;">
-    <div class="card" style="text-align:center;">
-      <img id="pi" src="" alt="" style="width:64px;height:64px;object-fit:cover;margin:0 auto 6px;display:block;">
-      <div style="font-weight:700;font-size:0.85rem;" id="pn2"></div>
-      <div style="font-size:0.68rem;color:var(--text-dim);margin-top:2px;" id="ps2"></div>
-      <div style="margin:8px 0;" id="pp"></div>
-      <div id="prs"></div>
-      <button class="btn btn-sm" onclick="lo()" style="margin-top:8px;font-size:0.65rem;">Cerrar sesi&oacute;n</button>
-      <div id="pmsg" class="msg"></div>
-    </div>
+  <div class="profile-card" id="ps" style="display:none;">
+    <img id="pi" src="" alt="">
+    <div class="pn" id="pn2"></div>
+    <div class="ps" id="ps2"></div>
+    <div style="margin:8px 0;" id="pp"></div>
+    <div id="prs"></div>
+    <button class="calc-btn" onclick="lo()" style="margin-top:8px;">Cerrar sesi&oacute;n</button>
+    <div id="pmsg" class="msg"></div>
   </div>
 </div>
 
-<div class="ft">AstroChino 2026</div>
+<div class="footer">AstroChino 2026</div>
 </div>
 
-<div class="nv">
-  <button class="a" data-tab="th"><i class="fas fa-star"></i> Hoy</button>
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="active" data-tab="th"><i class="fas fa-meteor"></i> Inicio</button>
   <button data-tab="ts"><i class="fas fa-dragon"></i> Signos</button>
   <button data-tab="tc"><i class="fas fa-yin-yang"></i> Compat</button>
   <button data-tab="tu"><i class="fas fa-user"></i> Cuenta</button>
 </div>
 
-<div class="mo" id="am">
-  <div class="m">
-    <button class="m-x" onclick="cm()">X</button>
-    <img class="m-img" id="mi" src="" alt="">
-    <div class="m-b">
+<!-- MODAL -->
+<div class="modal" id="am">
+  <div class="modal-content">
+    <button class="modal-close" onclick="cm()">X</button>
+    <img class="modal-img" id="mi" src="" alt="">
+    <div class="modal-body">
       <h2 id="mn"></h2>
-      <div class="mt" id="mm"></div>
-      <div class="ms"><h3>Personalidad</h3><p id="mp"></p></div>
-      <div class="ms"><h3>A&ntilde;os de este signo</h3><div class="ys" id="my"></div></div>
-      <div class="ms"><h3>Elementos</h3><div class="tg" id="me"></div></div>
-      <div class="ms"><h3>Suerte</h3><p id="ml"></p></div>
-      <div class="ms"><h3>Compatibilidad</h3><p id="mc"></p></div>
+      <div class="meta" id="mm"></div>
+      <div class="modal-section"><h3>Personalidad</h3><p id="mp"></p></div>
+      <div class="modal-section"><h3>A&ntilde;os de este signo</h3><div class="years" id="my"></div></div>
+      <div class="modal-section"><h3>Elementos</h3><div class="tags" id="me"></div></div>
+      <div class="modal-section"><h3>Suerte</h3><p id="ml"></p></div>
+      <div class="modal-section"><h3>Compatibilidad</h3><p id="mc"></p></div>
     </div>
   </div>
 </div>
 
 <script>
 const A = 'Rata,Buey,Tigre,Conejo,Drag\u00f3n,Serpiente,Caballo,Cabra,Mono,Gallo,Perro,Cerdo'.split(',');
-const AI = A.map(a => '/static/images/'+a+'.jpg');
+const AI = A.map(a => 'static/images/'+a+'.jpg');
 const YRS = A.map((_,i) => { const b=2020+i, y=[]; for(let yr=b;yr>=1900;yr-=12) y.push(yr); for(let yr=b+12;yr<=2040;yr+=12) y.push(yr); return y.sort((a,b)=>b-a); });
 const ST = {'Rata':['Amatista','Ojo de tigre','Cuarzo rosa'],'Buey':['Jade','Onix','Agata'],'Tigre':['Ojo de halcon','Citrino','Granate'],'Conejo':['Jade blanco','Cuarzo rosa','Perla'],'Drag\u00f3n':['Jade verde','Opalo','Rubi'],'Serpiente':['Ojo de gato','Malaquita','Turquesa'],'Caballo':['Granate','Cornalina','Ojo de tigre'],'Cabra':['Cuarzo rosa','Jade','Amatista'],'Mono':['Obsidiana','Lapislazuli','Citrino'],'Gallo':['Topacio','Ambar','Ojo de halcon'],'Perro':['Zafiro','Onix','Jade'],'Cerdo':['Rubi','Turmalina','Cuarzo']};
 const CB = {'Rata':'Excelente con Drag\u00f3n y Mono.','Buey':'Excelente con Serpiente y Gallo.','Tigre':'Excelente con Caballo y Perro.','Conejo':'Excelente con Cerdo y Cabra.','Drag\u00f3n':'Excelente con Rata y Mono.','Serpiente':'Excelente con Gallo y Buey.','Caballo':'Excelente con Tigre y Perro.','Cabra':'Excelente con Cerdo y Conejo.','Mono':'Excelente con Rata y Drag\u00f3n.','Gallo':'Excelente con Buey y Serpiente.','Perro':'Excelente con Tigre y Caballo.','Cerdo':'Excelente con Conejo y Cabra.'};
+const DASHBOARD = [
+  {icon:'fa-star', name:'Carta Natal China', desc:'Mapa astral celestial'},
+  {icon:'fa-sun', name:'Hor\u00f3scopo Diario', desc:'Predicciones del cielo'},
+  {icon:'fa-calendar-week', name:'Hor\u00f3scopo Semanal', desc:'Energ\u00eda de la semana'},
+  {icon:'fa-yin-yang', name:'Compatibilidad', desc:'Conexi\u00f3n entre signos'},
+  {icon:'fa-mountain', name:'Cinco Elementos', desc:'Madera, Fuego, Tierra, Metal, Agua'},
+  {icon:'fa-dragon', name:'Ciclos Energ\u00e9ticos', desc:'Ritmos naturales'},
+];
 let tk = localStorage.getItem('token');
 let cp = 'today';
 
 async function ap(p,o) {
   const h = {'Content-Type':'application/json'};
   if (tk) h['Authorization'] = 'Bearer '+tk;
-  const r = await fetch('/api'+p, {...o,headers:h});
+  const r = await fetch('https://astrochino.onrender.com/api'+p, {...o,headers:h});
   if (!r.ok) { const e = await r.json().catch(()=>({detail:r.statusText})); throw new Error(e.detail||'Error'); }
   return r.json();
 }
 
 function st(t) {
-  document.querySelectorAll('.nv button').forEach(b => b.classList.toggle('a', b.dataset.tab === t));
-  document.querySelectorAll('.sec').forEach(s => s.classList.remove('a'));
-  document.getElementById(t).classList.add('a');
+  document.querySelectorAll('.bottom-nav button, .header-nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  document.getElementById(t).classList.add('active');
   if (t==='ts') gs();
   if (t==='tu' && tk) fp();
 }
-document.querySelectorAll('.nv button').forEach(b => b.addEventListener('click', ()=>st(b.dataset.tab)));
+document.querySelectorAll('.bottom-nav button, .header-nav button').forEach(b => b.addEventListener('click', ()=>st(b.dataset.tab)));
 
 function ta(l) { document.getElementById('rf').style.display=l?'none':'block'; document.getElementById('lf').style.display=l?'block':'none'; }
 
-// Grid home
-function rg(c, h) {
+// Grid
+function rg(c) {
   c.innerHTML = A.map((a,i) =>
-    '<div class="ac" onclick="'+h+'('+i+')"><img src="'+AI[i]+'" alt="'+a+'" loading="lazy"><div class="lbl"><div class="n">'+a+'</div></div></div>'
+    '<div class="animal-card" onclick="om('+i+')"><img src="'+AI[i]+'" alt="'+a+'" loading="lazy"><div class="label"><div class="name">'+a+'</div></div></div>'
   ).join('');
 }
-rg(document.getElementById('ag'), 'om');
+rg(document.getElementById('ag'));
 
-// Grid signos
 function gs() {
   ap('/animals').then(d => {
     document.getElementById('sg').innerHTML = d.animals.map((a,i) =>
-      '<div class="ac" onclick="om('+i+')"><img src="'+AI[i]+'" alt="'+a.name+'" loading="lazy"><div class="lbl"><div class="n">'+a.name+'</div><div class="s">'+a.element+' &middot; '+a.polarity+'</div></div></div>'
+      '<div class="animal-card" onclick="om('+i+')"><img src="'+AI[i]+'" alt="'+a.name+'" loading="lazy"><div class="label"><div class="name">'+a.name+'</div><div class="sub">'+a.element+' &middot; '+a.polarity+'</div></div></div>'
     ).join('');
   }).catch(()=>{});
 }
 
+// Dashboard
+(function() {
+  document.getElementById('dg').innerHTML = DASHBOARD.map(d =>
+    '<div class="dash-card"><div class="icon"><i class="fas '+d.icon+'"></i></div><h4>'+d.name+'</h4><p>'+d.desc+'</p></div>'
+  ).join('');
+})();
+
 // Modal
 async function om(i) {
   const m = document.getElementById('am');
-  m.classList.add('s');
+  m.classList.add('open');
   document.getElementById('mi').src = AI[i];
   document.getElementById('mn').textContent = A[i];
   document.getElementById('mm').textContent = '';
@@ -477,34 +703,36 @@ async function om(i) {
   document.getElementById('my').innerHTML = YRS[i].slice(0,12).map(y => '<span class="y">'+y+'</span>').join('');
   try {
     const d = await ap('/animal/'+A[i]);
-    document.getElementById('mm').textContent = d.animal.element+' \u00b7 '+d.animal.polarity+' \u00b7 '+d.animal.branch+' \u00b7 '+d.animal.seasons;
+    document.getElementById('mm').innerHTML = '<span>'+d.animal.element+'</span> &middot; <span>'+d.animal.polarity+'</span> &middot; <span>'+d.animal.branch+'</span>';
     document.getElementById('mp').textContent = d.personality;
-    document.getElementById('me').innerHTML = '<span>'+d.animal.element+'</span><span> \u00b7 </span><span>'+d.animal.polarity+'</span><span> \u00b7 </span><span>'+d.animal.branch+'</span><span> \u00b7 </span><span>'+d.animal.hours+'</span>';
+    document.getElementById('me').innerHTML = '<span>'+d.animal.element+'</span><span> &middot; </span><span>'+d.animal.polarity+'</span><span> &middot; </span><span>'+d.animal.branch+'</span><span> &middot; </span><span>'+d.animal.hours+'</span>';
     document.getElementById('ml').innerHTML = 'N\u00fameros: '+(d.lucky?.numeros?.join(', '))+'<br>Colores: '+(d.lucky?.colores?.join(', '))+'<br>Direcci\u00f3n: '+(d.lucky?.direccion||'-')+'<br>Piedras: '+(ST[A[i]]?.join(', ')||'-');
     document.getElementById('mc').textContent = CB[A[i]]||'';
   } catch(e) { document.getElementById('mp').textContent = 'Informaci\u00f3n no disponible'; }
 }
-function cm() { document.getElementById('am').classList.remove('s'); }
+function cm() { document.getElementById('am').classList.remove('open'); }
 document.getElementById('am').addEventListener('click', function(e) { if(e.target===this) cm(); });
 
-// Calc sign
+// Calc
 async function cs() {
   const y=parseInt(document.getElementById('cy').value), m=parseInt(document.getElementById('cm').value), d=parseInt(document.getElementById('cd').value);
   try {
     const r = await ap('/calculate?year='+y+'&month='+m+'&day='+d);
-    document.getElementById('cr2').innerHTML = '<div class="cr2"><img src="'+AI[r.animal.id]+'"><h3>'+r.animal.name+'</h3><p>'+r.element+' \u00b7 '+r.animal.polarity+'</p></div>';
-  } catch(e) { document.getElementById('cr2').innerHTML = '<p style="color:var(--red);font-size:0.7rem;margin-top:6px;">Error</p>'; }
+    const el = document.getElementById('cr');
+    el.innerHTML = '<img src="'+AI[r.animal.id]+'"><div class="info"><h3>'+r.animal.name+'</h3><p>'+r.element+' &middot; '+r.animal.polarity+'</p></div>';
+    el.classList.add('show');
+  } catch(e) { document.getElementById('cr').innerHTML = '<p style="color:var(--red-imperial);font-size:0.65rem;">Error</p>'; document.getElementById('cr').classList.add('show'); }
 }
 
-// Horoscope
+// Horo
 async function lh(pr) {
   cp = pr;
-  document.querySelectorAll('.pt button').forEach(b => b.classList.toggle('a', b.dataset.p===pr));
+  document.querySelectorAll('#pt button').forEach(b => b.classList.toggle('active', b.dataset.p===pr));
   const el = document.getElementById('hl');
   try {
     const d = await ap('/animals');
     el.innerHTML = d.animals.map((a,i) =>
-      '<div class="hi" onclick="sh(\''+a.name+'\',\''+pr+'\')"><img src="'+AI[i]+'" loading="lazy"><div class="inf"><div class="n">'+a.name+'</div><div class="p">Cargando...</div></div><div class="ar">&gt;</div></div>'
+      '<div class="horo-item" onclick="sh(\''+a.name+'\',\''+pr+'\')"><img src="'+AI[i]+'" loading="lazy"><div class="info"><div class="n">'+a.name+'</div><div class="p">Cargando...</div></div><div class="arrow"><i class="fas fa-chevron-right"></i></div></div>'
     ).join('');
     d.animals.forEach(async (a,i) => {
       try {
@@ -513,20 +741,19 @@ async function lh(pr) {
         if (c) c.querySelector('.p').textContent = h.horoscope.slice(0,80)+'...';
       } catch(e) {}
     });
-  } catch(e) { el.innerHTML = '<p style="color:var(--text-dim);">Error</p>'; }
+  } catch(e) { el.innerHTML = '<p style="color:var(--silk-dim);font-size:0.65rem;text-align:center;padding:20px;">Error al cargar</p>'; }
 }
 async function sh(n,pr) {
   try {
     const h = await ap('/horoscope/'+n+'?period='+pr);
     const i = A.indexOf(n);
     const l = document.getElementById('hl');
-    const o = l.querySelector('.he');
+    const o = l.querySelector('.horo-exp');
     if (o) o.remove();
     const d = document.createElement('div');
-    d.className = 'he';
-    d.innerHTML = '<div class="tp"><img src="'+AI[i]+'"><div><div class="nn">'+h.animal+'</div><div class="dd">'+h.date+'</div></div></div><div class="tx">'+h.horoscope+'</div><div class="lu">N\u00fameros: '+(h.lucky?.numeros?.join(', '))+' \u00b7 Colores: '+(h.lucky?.colores?.join(', '))+'</div>';
-    const c = l.children[i];
-    if (c) c.after(d);
+    d.className = 'horo-exp';
+    d.innerHTML = '<div class="top"><img src="'+AI[i]+'"><div><div class="nn">'+h.animal+'</div><div class="dd">'+h.date+'</div></div></div><div class="tx">'+h.horoscope+'</div><div class="lucky">N\u00fameros: '+(h.lucky?.numeros?.join(', '))+' &middot; Colores: '+(h.lucky?.colores?.join(', '))+'</div>';
+    l.children[i]?.after(d);
     d.scrollIntoView({behavior:'smooth', block:'center'});
   } catch(e) {}
 }
@@ -534,14 +761,15 @@ async function sh(n,pr) {
 // Compat
 async function cc() {
   const a1=document.getElementById('c1').value, a2=document.getElementById('c2').value, el=document.getElementById('cres');
-  if (!a1||!a2) { el.innerHTML='<p style="color:var(--text-dim);margin-top:6px;">Seleccion\u00e1 dos animales</p>'; return; }
+  if (!a1||!a2) { el.innerHTML='<p style="color:var(--silk-dim);margin-top:6px;">Seleccion\u00e1 dos animales</p>'; el.classList.add('show'); return; }
   try {
     const r = await ap('/compatibility?animal1='+a1+'&animal2='+a2);
     const c=r.compatibility;
-    const cs={Excelente:'var(--gold)',Buena:'#4caf50',Neutral:'#ff9800',Desafiante:'#e91e63',Conflicto:'var(--red)'};
+    const cs={Excelente:'var(--gold)',Buena:'#4caf50',Neutral:'#ff9800',Desafiante:'#e91e63',Conflicto:'var(--red-imperial)'};
     const i1=A.indexOf(r.animal1.name), i2=A.indexOf(r.animal2.name);
-    el.innerHTML = '<div class="cd"><div class="pr"><img src="'+AI[i1]+'"><span class="nn">'+r.animal1.name+'</span><span class="hrt">&hearts;</span><span class="nn">'+r.animal2.name+'</span><img src="'+AI[i2]+'"></div><div class="cb"><div class="cbf" style="width:'+c.score+'%;background:'+(cs[c.level]||'#888')+';"></div></div><div class="lv" style="color:'+(cs[c.level]||'#888')+';">'+c.level+' ('+c.score+'%)</div><div class="ds">'+c.desc+'</div></div>';
-  } catch(e) { el.innerHTML = '<p style="color:var(--red);">Error</p>'; }
+    el.innerHTML = '<div class="pair"><img src="'+AI[i1]+'"><span class="nn">'+r.animal1.name+'</span><span style="color:var(--red-imperial);font-size:0.8rem;">&hearts;</span><span class="nn">'+r.animal2.name+'</span><img src="'+AI[i2]+'"></div><div class="bar"><div class="bar-fill" style="width:'+c.score+'%;background:'+(cs[c.level]||'#888')+';"></div></div><div class="level" style="color:'+(cs[c.level]||'#888')+';">'+c.level+' ('+c.score+'%)</div><div class="desc">'+c.desc+'</div>';
+    el.classList.add('show');
+  } catch(e) { el.innerHTML = '<p style="color:var(--red-imperial);">Error</p>'; el.classList.add('show'); }
 }
 
 // Auth
@@ -576,13 +804,13 @@ async function fp() {
     const i = A.indexOf(d.user.animal);
     document.getElementById('pi').src = i>=0?AI[i]:AI[4];
     document.getElementById('pn2').textContent = d.user.nombre||d.user.email;
-    document.getElementById('ps2').textContent = (d.user.signo||d.user.animal)+' \u00b7 A\u00f1o '+d.user.birth_year;
+    document.getElementById('ps2').textContent = (d.user.signo||d.user.animal)+' &middot; A\u00f1o '+d.user.birth_year;
     if (d.user.premium) {
-      document.getElementById('pp').innerHTML='<span class="pb">PREMIUM</span>';
+      document.getElementById('pp').innerHTML='<span class="premium-badge">PREMIUM</span>';
       document.getElementById('prs').innerHTML='';
     } else {
-      document.getElementById('pp').innerHTML='<span style="font-size:0.68rem;color:var(--text-dim);">Gratuito</span>';
-      document.getElementById('prs').innerHTML='<button class="btn btn-sm" onclick="alert(\'Pr\u00f3ximamente\')" style="margin-top:4px;">Premium $2/mes</button>';
+      document.getElementById('pp').innerHTML='<span style="font-size:0.6rem;color:var(--silk-dim);">Gratuito</span>';
+      document.getElementById('prs').innerHTML='<button class="calc-btn" onclick="alert(\'Pr\u00f3ximamente\')" style="margin-top:4px;">Premium $2/mes</button>';
     }
   } catch(e) { lo(); }
 }
@@ -599,10 +827,11 @@ function lo() { tk=null; localStorage.removeItem('token'); document.getElementBy
   ['c1','c2'].forEach(id => {
     document.getElementById(id).innerHTML = '<option value="">Eleg\u00ed</option>'+A.map((a,i)=>'<option value="'+a+'">'+a+'</option>').join('');
   });
-  document.getElementById('pn').innerHTML = [{k:'today',l:'Hoy'},{k:'tomorrow',l:'Ma\u00f1ana'},{k:'weekly',l:'Semanal'},{k:'monthly',l:'Mensual'},{k:'yearly',l:'Anual'}].map(p => '<button data-p="'+p.k+'" class="'+(p.k==='today'?'a':'')+'" onclick="lh(\''+p.k+'\')">'+p.l+'</button>').join('');
+  document.getElementById('pt').innerHTML = [{k:'today',l:'Hoy'},{k:'tomorrow',l:'Ma\u00f1ana'},{k:'weekly',l:'Semanal'},{k:'monthly',l:'Mensual'},{k:'yearly',l:'Anual'}].map(p => '<button data-p="'+p.k+'" class="'+(p.k==='today'?'active':'')+'" onclick="lh(\''+p.k+'\')">'+p.l+'</button>').join('');
   lh('today');
   if (tk) fp();
 })();
 </script>
+<script src="static/capacitor-bridge.js"></script>
 </body>
 </html>
