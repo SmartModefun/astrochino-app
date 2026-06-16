@@ -186,6 +186,12 @@ async def index():
         return FileResponse("static/index.html")
     return {"status": "ok", "app": "AstroChino"}
 
+@app.get("/favicon.png")
+async def favicon():
+    if os.path.exists("favicon.png"):
+        return FileResponse("favicon.png")
+    raise HTTPException(404)
+
 @app.get("/static/images/{filename}")
 async def serve_image(filename: str):
     path = os.path.join("static/images", filename)
