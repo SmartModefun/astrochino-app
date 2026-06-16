@@ -44,8 +44,9 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Sync Capacitor (copy web assets + SPM dependencies)
+      - name: Add & Sync Capacitor iOS platform
         run: |
+          npx cap add ios
           npx cap sync ios
 
       - name: Patch Info.plist with app-specific keys
