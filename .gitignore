@@ -10,3 +10,4 @@ ios/App/build/
 ios/App/Pods/
 ios/App/App.xcworkspace/
 *.keystore
+keystore_base64.txt

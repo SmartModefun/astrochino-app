@@ -20,6 +20,15 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+    signingConfigs {
+        release {
+            storeFile file('astrochino-release.keystore')
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "astrochino123"
+            keyAlias "astrochino"
+            keyPassword System.getenv("KEYSTORE_PASSWORD") ?: "astrochino123"
         }
     }
 }
