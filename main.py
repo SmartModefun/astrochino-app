@@ -186,6 +186,13 @@ async def index():
         return FileResponse("static/index.html")
     return {"status": "ok", "app": "AstroChino"}
 
+@app.get("/privacy")
+@app.get("/privacy.html")
+async def privacy():
+    if os.path.exists("static/privacy.html"):
+        return FileResponse("static/privacy.html")
+    raise HTTPException(404)
+
 @app.get("/favicon.png")
 async def favicon():
     if os.path.exists("favicon.png"):
